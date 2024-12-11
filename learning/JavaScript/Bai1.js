@@ -20,5 +20,5 @@
 let a = new XeMay("Michelin", "Động cơ V8", "Động cơ xăng")
 a.LopXe = "Dunlop"
 console.log(a)
-
+console.log(a.getLopXe())
 
