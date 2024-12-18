@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Task Manager</title>
+    <title>Quản lý công việc P.CNTT - KTTC</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { color: #333; }
@@ -13,25 +13,32 @@
     </style>
 </head>
 <body>
-    <h1>Task Manager</h1>
+    <h1>Quản lý công việc P.CNTT - KTTC</h1>
 
     <!-- Form thêm công việc -->
-    <h2>Add Task</h2>
+    <h2>Thêm đầu việc</h2>
     <div>
-        <input id="taskName" type="text" placeholder="Task Name">
-        <textarea id="taskDesc" placeholder="Task Description"></textarea>
-        <button onclick="addTask()">Add Task</button>
+        <input id="taskName" type="text" placeholder="Tên đầu việc">
+        <textarea id="taskDesc" placeholder="Mô tả đầu việc"></textarea>
+        <button onclick="addTask()">Thêm đầu việc</button>
     </div>
 
+    <!-- Form import file Excel -->
+    <h2>Import danh sách công việc từ Excel</h2>
+    <form id="importForm" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".xlsx">
+        <button type="submit">Import</button>
+    </form>
+
     <!-- Bảng hiển thị danh sách công việc -->
-    <h2>Task List</h2>
+    <h2>Danh sách đầu việc</h2>
     <table>
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Actions</th>
+                <th>Tên</th>
+                <th>Mô tả</th>
+                <th>Hành động</th>
             </tr>
         </thead>
         <tbody id="taskTable">
@@ -86,6 +93,23 @@
                     if (response.ok) fetchTasks();
                 });
         }
+
+        // Handle Excel import
+        document.getElementById('importForm').onsubmit = function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/import', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    fetchTasks();
+                    alert('Import thành công!');
+                } else {
+                    response.json().then(data => alert(data.error || 'Import thất bại!'));
+                }
+            });
+        };
 
         // Load tasks on page load
         window.onload = fetchTasks;
