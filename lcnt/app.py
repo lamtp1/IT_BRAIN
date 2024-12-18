@@ -1,37 +1,21 @@
+import os
 from flask import Flask, request, jsonify, render_template
 from flask_mysqldb import MySQL
-from datetime import datetime, timedelta
-import threading
+import pandas as pd
 
 app = Flask(__name__)
 
-# Configure MySQL connection
+# Cấu hình MySQL
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '123456'  # Replace with your MariaDB password
+app.config['MYSQL_PASSWORD'] = '123456'
 app.config['MYSQL_DB'] = 'task_management'
-app.config['MYSQL_PORT'] = 3306               # Cổng MariaDB (mặc định là 3306)
-app.config['MYSQL_CONNECT_TIMEOUT'] = 10     # Thời gian chờ kết nối (giây)
 mysql = MySQL(app)
 
-# Initialize database
-def init_db():
-    with app.app_context():
-        conn = mysql.connection
-        cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS tasks (
-                            id INT AUTO_INCREMENT PRIMARY KEY,
-                            name VARCHAR(255),
-                            description TEXT
-                          )''')
-        cursor.execute('''CREATE TABLE IF NOT EXISTS milestones (
-                            id INT AUTO_INCREMENT PRIMARY KEY,
-                            task_id INT,
-                            milestone_time DATETIME,
-                            assignee VARCHAR(255),
-                            FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
-                          )''')
-        conn.commit()
+# Đường dẫn lưu file tạm thời
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
 def index():
@@ -40,52 +24,58 @@ def index():
 @app.route('/tasks', methods=['GET', 'POST'])
 def tasks():
     if request.method == 'GET':
-        cursor = mysql.connection.cursor()
-        cursor.execute("SELECT * FROM tasks")
-        tasks = cursor.fetchall()
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM tasks")
+        tasks = cur.fetchall()
+        cur.close()
         return jsonify(tasks)
     elif request.method == 'POST':
         data = request.json
-        cursor = mysql.connection.cursor()
-        cursor.execute("INSERT INTO tasks (name, description) VALUES (%s, %s)", (data['name'], data['description']))
+        name = data['name']
+        description = data['description']
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO tasks (name, description) VALUES (%s, %s)", (name, description))
         mysql.connection.commit()
-        return jsonify({'message': 'Task created successfully!'})
+        cur.close()
+        return jsonify({'message': 'Task added successfully'}), 201
 
-@app.route('/tasks/<int:task_id>', methods=['PUT', 'DELETE'])
-def task_operations(task_id):
-    cursor = mysql.connection.cursor()
-    if request.method == 'PUT':
-        data = request.json
-        cursor.execute("UPDATE tasks SET name = %s, description = %s WHERE id = %s", (data['name'], data['description'], task_id))
-        mysql.connection.commit()
-        return jsonify({'message': 'Task updated successfully!'})
-    elif request.method == 'DELETE':
-        cursor.execute("DELETE FROM tasks WHERE id = %s", (task_id,))
-        mysql.connection.commit()
-        return jsonify({'message': 'Task deleted successfully!'})
-
-@app.route('/milestones', methods=['POST'])
-def add_milestone():
-    data = request.json
-    cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO milestones (task_id, milestone_time, assignee) VALUES (%s, %s, %s)", 
-                   (data['task_id'], data['milestone_time'], data['assignee']))
+@app.route('/tasks/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM tasks WHERE id = %s", (task_id,))
     mysql.connection.commit()
-    return jsonify({'message': 'Milestone added successfully!'})
+    cur.close()
+    return jsonify({'message': 'Task deleted successfully'}), 200
 
-def check_alerts():
-    while True:
-        cursor = mysql.connection.cursor()
-        now = datetime.now()
-        cursor.execute("SELECT milestone_time, assignee FROM milestones")
-        milestones = cursor.fetchall()
-        for milestone_time, assignee in milestones:
-            if milestone_time - now <= timedelta(minutes=10):  # Configure alert threshold
-                print(f"Alert: Milestone due soon for {assignee}!")
-        cursor.close()
+@app.route('/import', methods=['POST'])
+def import_excel():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    # Lưu file Excel
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    file.save(filepath)
+
+    # Đọc nội dung file Excel
+    try:
+        df = pd.read_excel(filepath)
+        if 'Tên' not in df.columns or 'Mô tả' not in df.columns:
+            return jsonify({'error': 'Invalid Excel format. Columns "Tên" and "Mô tả" are required.'}), 400
+
+        # Insert dữ liệu vào database
+        cur = mysql.connection.cursor()
+        for _, row in df.iterrows():
+            cur.execute("INSERT INTO tasks (name, description) VALUES (%s, %s)", (row['Tên'], row['Mô tả']))
+        mysql.connection.commit()
+        cur.close()
+        return jsonify({'message': 'Data imported successfully'}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        os.remove(filepath)  # Xóa file sau khi xử lý
 
 if __name__ == '__main__':
-    with app.app_context():
-        init_db()
-    threading.Thread(target=check_alerts, daemon=True).start()
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
