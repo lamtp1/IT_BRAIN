@@ -9,7 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import threading
 import time
-import logging
+
 
 app = Flask(__name__)
 
@@ -60,6 +60,7 @@ def get_tasks():
 
 @app.route('/tasks', methods=['POST'])
 def add_task():
+    global sent_emails
     data = request.json
     name = data['name']
     description = data['description']
@@ -73,10 +74,15 @@ def add_task():
     mysql.connection.commit()
     cur.close()
 
+    # Remove task identifier from sent_emails (if it exists)
+    task_identifier = f"{email}_{deadline}"
+    sent_emails.discard(task_identifier)
+
     return jsonify({'message': 'Task added successfully'}), 201
 
 @app.route('/tasks/<int:task_id>', methods=['PUT'])
 def update_task(task_id):
+    global sent_emails
     data = request.json
     name = data['name']
     description = data['description']
@@ -85,10 +91,17 @@ def update_task(task_id):
     employee = data.get('employee', None)  # New field
 
     cur = mysql.connection.cursor()
+    cur.execute("SELECT email, deadline FROM tasks WHERE id = %s", (task_id,))
+    old_task = cur.fetchone()
     cur.execute("UPDATE tasks SET name = %s, description = %s, deadline = %s, email = %s, employee = %s WHERE id = %s", 
                 (name, description, deadline, email, employee, task_id))
     mysql.connection.commit()
     cur.close()
+
+        # Remove old task identifier from sent_emails
+    if old_task:
+        old_task_identifier = f"{old_task[0]}_{old_task[1]}"
+        sent_emails.discard(old_task_identifier)
 
     return jsonify({'message': 'Task updated successfully'}), 200
 
@@ -152,10 +165,10 @@ def send_email(recipient, subject, content):
     finally:
         server.quit()
 
-logging.basicConfig(level=logging.INFO)
+sent_emails = set()  # Global variable to track sent emails
 
 def notify_due_tasks():
-    logging.info("Chạy notify_due_tasks...")
+    global sent_emails
     # Tạo kết nối mới mỗi lần chạy
     with app.app_context():
         cur = mysql.connection.cursor()
@@ -167,14 +180,11 @@ def notify_due_tasks():
         tasks = cur.fetchall()
         cur.close()
 
-        processed_tasks = set()  # Lưu trữ các công việc đã xử lý
-
         for task in tasks:
             name, deadline, email, employee = task
             task_identifier = f"{email}_{deadline}"  # Định danh duy nhất cho công việc
-            if email and task_identifier not in processed_tasks:  # Kiểm tra trùng lặp
-                processed_tasks.add(task_identifier)
-                logging.info(f"Gửi email tới {email} cho công việc '{name}' (Deadline: {deadline})")
+            if email and task_identifier not in sent_emails:  # Kiểm tra trùng lặp
+                sent_emails.add(task_identifier)
                 subject = f"Reminder: Task '{name}' is approaching"
                 content = f"""
                 <p>Dear {employee},</p>
@@ -183,24 +193,13 @@ def notify_due_tasks():
                 """
                 send_email(email, subject, content)
 
-
-notification_thread_started = False  # Global flag to ensure a single thread
-
 def start_notification_thread():
-    global notification_thread_started
-    if notification_thread_started:
-        logging.info("Notification thread already running. Skipping...")
-        return
-    notification_thread_started = True
-
     def notify():
         with app.app_context():  # Push the app context here
             while True:
-                logging.info("Notification thread running...")
                 notify_due_tasks()
                 time.sleep(24*60*60)  # Run daily
 
-    logging.info("Starting notification thread...")
     threading.Thread(target=notify, daemon=True).start()
 
 # Start the notification thread
