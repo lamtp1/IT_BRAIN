@@ -9,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import threading
 import time
+import logging
 
 app = Flask(__name__)
 
@@ -151,34 +152,55 @@ def send_email(recipient, subject, content):
     finally:
         server.quit()
 
-def notify_due_tasks():
-    cur = mysql.connection.cursor()
-    cur.execute("""
-        SELECT name, deadline, email, employee 
-        FROM tasks 
-        WHERE TIMESTAMPDIFF(DAY, deadline, NOW()) BETWEEN 0 AND 3
-    """)
-    tasks = cur.fetchall()
-    cur.close()
+logging.basicConfig(level=logging.INFO)
 
-    for task in tasks:
-        name, deadline, email, employee = task
-        if email:
-            subject = f"Reminder: Task '{name}' is approaching"
-            content = f"""
-            <p>Dear {employee},</p>
-            <p>Đây là mail thông báo để nhắc rằng đầu việc  <b>'{name}'</b> sẽ đến hạn vào ngày <b>{deadline}</b>.</p>
-            <p>Vậy nên hãy đảm bảo hoàn thành đầu việc đúng hạn.</p>
-            """
-            send_email(email, subject, content)
+def notify_due_tasks():
+    logging.info("Chạy notify_due_tasks...")
+    # Tạo kết nối mới mỗi lần chạy
+    with app.app_context():
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            SELECT name, deadline, email, employee 
+            FROM tasks 
+            WHERE TIMESTAMPDIFF(DAY, NOW(), deadline) BETWEEN 0 AND 3
+        """)
+        tasks = cur.fetchall()
+        cur.close()
+
+        processed_tasks = set()  # Lưu trữ các công việc đã xử lý
+
+        for task in tasks:
+            name, deadline, email, employee = task
+            task_identifier = f"{email}_{deadline}"  # Định danh duy nhất cho công việc
+            if email and task_identifier not in processed_tasks:  # Kiểm tra trùng lặp
+                processed_tasks.add(task_identifier)
+                logging.info(f"Gửi email tới {email} cho công việc '{name}' (Deadline: {deadline})")
+                subject = f"Reminder: Task '{name}' is approaching"
+                content = f"""
+                <p>Dear {employee},</p>
+                <p>Đây là mail thông báo để nhắc rằng đầu việc <b>'{name}'</b> sẽ đến hạn vào ngày <b>{deadline}</b>.</p>
+                <p>Vậy nên hãy đảm bảo hoàn thành đầu việc đúng hạn.</p>
+                """
+                send_email(email, subject, content)
+
+
+notification_thread_started = False  # Global flag to ensure a single thread
 
 def start_notification_thread():
+    global notification_thread_started
+    if notification_thread_started:
+        logging.info("Notification thread already running. Skipping...")
+        return
+    notification_thread_started = True
+
     def notify():
         with app.app_context():  # Push the app context here
             while True:
+                logging.info("Notification thread running...")
                 notify_due_tasks()
                 time.sleep(24*60*60)  # Run daily
 
+    logging.info("Starting notification thread...")
     threading.Thread(target=notify, daemon=True).start()
 
 # Start the notification thread
