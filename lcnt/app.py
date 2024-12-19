@@ -1,8 +1,12 @@
 import os
+import smtplib
 from flask import Flask, request, jsonify, render_template
 from flask_mysqldb import MySQL
 import pandas as pd
 import math
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -12,6 +16,12 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = '123456'
 app.config['MYSQL_DB'] = 'task_management'
 mysql = MySQL(app)
+
+# Email configuration
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+SMTP_EMAIL = "tuphulam@gmail.com"
+SMTP_PASSWORD = "kbkzbbvnsjldnmdg "
 
 # Đường dẫn lưu file tạm thời
 UPLOAD_FOLDER = 'uploads'
@@ -50,9 +60,10 @@ def add_task():
     data = request.json
     name = data['name']
     description = data['description']
+    deadline = data['deadline']
 
     cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO tasks (name, description) VALUES (%s, %s)", (name, description))
+    cur.execute("INSERT INTO tasks (name, description, deadline) VALUES (%s, %s, %s)", (name, description, deadline))
     mysql.connection.commit()
     cur.close()
 
@@ -63,9 +74,10 @@ def update_task(task_id):
     data = request.json
     name = data['name']
     description = data['description']
+    deadline = data['deadline']
 
     cur = mysql.connection.cursor()
-    cur.execute("UPDATE tasks SET name = %s, description = %s WHERE id = %s", (name, description, task_id))
+    cur.execute("UPDATE tasks SET name = %s, description = %s, deadline = %s WHERE id = %s", (name, description, deadline, task_id))
     mysql.connection.commit()
     cur.close()
 
@@ -93,12 +105,12 @@ def import_excel():
 
     try:
         df = pd.read_excel(filepath)
-        if 'Tên' not in df.columns or 'Mô tả' not in df.columns:
-            return jsonify({'error': 'Invalid Excel format. Columns "Tên" and "Mô tả" are required.'}), 400
+        if 'Tên' not in df.columns or 'Mô tả' not in df.columns or 'Deadline' not in df.columns:
+            return jsonify({'error': 'Invalid Excel format. Columns "Tên", "Mô tả", and "Deadline" are required.'}), 400
 
         cur = mysql.connection.cursor()
         for _, row in df.iterrows():
-            cur.execute("INSERT INTO tasks (name, description) VALUES (%s, %s)", (row['Tên'], row['Mô tả']))
+            cur.execute("INSERT INTO tasks (name, description, deadline) VALUES (%s, %s, %s)", (row['Tên'], row['Mô tả'], row['Deadline']))
         mysql.connection.commit()
         cur.close()
 
@@ -107,6 +119,29 @@ def import_excel():
         return jsonify({'error': str(e)}), 500
     finally:
         os.remove(filepath)
+
+def send_email(recipient, subject, content):
+    # Tạo email
+    msg = MIMEMultipart()
+    msg["From"] = SMTP_EMAIL
+    msg["To"] = recipient
+    msg["Subject"] = subject
+    msg.attach(MIMEText(content, "html"))
+
+    # Kết nối đến SMTP server và gửi email
+    try:
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()  # Bắt đầu kết nối an toàn
+        server.login(SMTP_EMAIL, SMTP_PASSWORD)
+        server.sendmail(SMTP_EMAIL, recipient, msg.as_string())
+        print("Email sent successfully!")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+    finally:
+        server.quit()
+
+# Gửi email
+send_email("tuphulam@gmail.com", "Test Email", "<h1>This is a test email for lamtp1</h1>")
 
 if __name__ == '__main__':
     app.run(debug=True)
