@@ -7,6 +7,8 @@ import math
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+import threading
+import time
 
 app = Flask(__name__)
 
@@ -21,7 +23,7 @@ mysql = MySQL(app)
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_EMAIL = "tuphulam@gmail.com"
-SMTP_PASSWORD = "kbkzbbvnsjldnmdg "
+SMTP_PASSWORD = "kbkzbbvnsjldnmdg"
 
 # Đường dẫn lưu file tạm thời
 UPLOAD_FOLDER = 'uploads'
@@ -61,9 +63,12 @@ def add_task():
     name = data['name']
     description = data['description']
     deadline = data['deadline']
+    email = data.get('email', None)  # New field
+    employee = data.get('employee', None)  # New field
 
     cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO tasks (name, description, deadline) VALUES (%s, %s, %s)", (name, description, deadline))
+    cur.execute("INSERT INTO tasks (name, description, deadline, email, employee) VALUES (%s, %s, %s, %s, %s)", 
+                (name, description, deadline, email, employee))
     mysql.connection.commit()
     cur.close()
 
@@ -75,9 +80,12 @@ def update_task(task_id):
     name = data['name']
     description = data['description']
     deadline = data['deadline']
+    email = data.get('email', None)  # New field
+    employee = data.get('employee', None)  # New field
 
     cur = mysql.connection.cursor()
-    cur.execute("UPDATE tasks SET name = %s, description = %s, deadline = %s WHERE id = %s", (name, description, deadline, task_id))
+    cur.execute("UPDATE tasks SET name = %s, description = %s, deadline = %s, email = %s, employee = %s WHERE id = %s", 
+                (name, description, deadline, email, employee, task_id))
     mysql.connection.commit()
     cur.close()
 
@@ -105,12 +113,15 @@ def import_excel():
 
     try:
         df = pd.read_excel(filepath)
-        if 'Tên' not in df.columns or 'Mô tả' not in df.columns or 'Deadline' not in df.columns:
-            return jsonify({'error': 'Invalid Excel format. Columns "Tên", "Mô tả", and "Deadline" are required.'}), 400
+        required_columns = ['Tên', 'Mô tả', 'Deadline', 'Email', 'Nhân viên']
+        for col in required_columns:
+            if col not in df.columns:
+                return jsonify({'error': f'Missing column: {col}'}), 400
 
         cur = mysql.connection.cursor()
         for _, row in df.iterrows():
-            cur.execute("INSERT INTO tasks (name, description, deadline) VALUES (%s, %s, %s)", (row['Tên'], row['Mô tả'], row['Deadline']))
+            cur.execute("INSERT INTO tasks (name, description, deadline, email, employee) VALUES (%s, %s, %s, %s, %s)", 
+                        (row['Tên'], row['Mô tả'], row['Deadline'], row['Email'], row['Nhân viên']))
         mysql.connection.commit()
         cur.close()
 
@@ -134,14 +145,44 @@ def send_email(recipient, subject, content):
         server.starttls()  # Bắt đầu kết nối an toàn
         server.login(SMTP_EMAIL, SMTP_PASSWORD)
         server.sendmail(SMTP_EMAIL, recipient, msg.as_string())
-        print("Email sent successfully!")
+        print(f"Email sent to {recipient}")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to send email to {recipient}: {e}")
     finally:
         server.quit()
 
-# Gửi email
-send_email("tuphulam@gmail.com", "Test Email", "<h1>This is a test email for lamtp1</h1>")
+def notify_due_tasks():
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT name, deadline, email, employee 
+        FROM tasks 
+        WHERE TIMESTAMPDIFF(DAY, deadline, NOW()) BETWEEN 0 AND 3
+    """)
+    tasks = cur.fetchall()
+    cur.close()
+
+    for task in tasks:
+        name, deadline, email, employee = task
+        if email:
+            subject = f"Reminder: Task '{name}' is approaching"
+            content = f"""
+            <p>Dear {employee},</p>
+            <p>Đây là mail thông báo để nhắc rằng đầu việc  <b>'{name}'</b> sẽ đến hạn vào ngày <b>{deadline}</b>.</p>
+            <p>Vậy nên hãy đảm bảo hoàn thành đầu việc đúng hạn.</p>
+            """
+            send_email(email, subject, content)
+
+def start_notification_thread():
+    def notify():
+        with app.app_context():  # Push the app context here
+            while True:
+                notify_due_tasks()
+                time.sleep(24*60*60)  # Run daily
+
+    threading.Thread(target=notify, daemon=True).start()
+
+# Start the notification thread
+start_notification_thread()
 
 if __name__ == '__main__':
     app.run(debug=True)
