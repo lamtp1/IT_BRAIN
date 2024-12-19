@@ -12,9 +12,8 @@
         input, textarea { width: 100%; padding: 5px; margin-bottom: 10px; }
         .pagination { margin-top: 10px; text-align: center; }
         .pagination button { padding: 5px 10px; }
-        /* Modal styles */
         .modal {
-            display: none; /* Hidden by default */
+            display: none;
             position: fixed;
             z-index: 1;
             left: 0;
@@ -55,6 +54,7 @@
     <div>
         <input id="taskName" type="text" placeholder="Tên đầu việc">
         <textarea id="taskDesc" placeholder="Mô tả đầu việc"></textarea>
+        <input id="taskDeadline" type="date" placeholder="Deadline">
         <button onclick="addTask()">Thêm đầu việc</button>
     </div>
 
@@ -73,6 +73,7 @@
                 <th>ID</th>
                 <th>Tên</th>
                 <th>Mô tả</th>
+                <th>Deadline</th>
                 <th>Hành động</th>
             </tr>
         </thead>
@@ -81,13 +82,6 @@
         </tbody>
     </table>
 
-    <!-- Pagination -->
-    <div class="pagination">
-        <button onclick="changePage('prev')">Previous</button>
-        <span id="pageInfo">Page 1</span>
-        <button onclick="changePage('next')">Next</button>
-    </div>
-
     <!-- Modal for updating task -->
     <div id="updateModal" class="modal">
         <div class="modal-content">
@@ -95,18 +89,26 @@
             <h2>Cập nhật đầu việc</h2>
             <input id="updateTaskName" type="text" placeholder="Tên mới">
             <textarea id="updateTaskDesc" placeholder="Mô tả mới"></textarea>
+            <input id="updateTaskDeadline" type="date" placeholder="Deadline mới">
             <button onclick="confirmUpdate()">Xác nhận</button>
         </div>
     </div>
 
+    <!-- Pagination controls -->
+    <div>
+        <button id="prevPage" onclick="prevPage()">Previous</button>
+        <span id="paginationInfo"></span>
+        <button id="nextPage" onclick="nextPage()">Next</button>
+    </div>
+
     <script>
         let currentPage = 1;
-        const tasksPerPage = 5;
-        let updateTaskId = null; // To store the ID of the task being updated
+        const tasksPerPage = 10;
+        let updateTaskId = null;
 
         // Fetch and display tasks with pagination
-        function fetchTasks() {
-            fetch(`/tasks?page=${currentPage}&limit=${tasksPerPage}`)
+        function fetchTasks(page = 1) {
+            fetch(`/tasks?page=${page}`)
                 .then(response => response.json())
                 .then(data => {
                     const table = document.getElementById('taskTable');
@@ -117,57 +119,56 @@
                                 <td>${task[0]}</td>
                                 <td>${task[1]}</td>
                                 <td>${task[2]}</td>
+                                <td>${task[3]}</td>
                                 <td>
+                                    <button onclick="openModal(${task[0]}, '${task[1]}', '${task[2]}', '${task[3]}')">Update</button>
                                     <button onclick="deleteTask(${task[0]})">Delete</button>
-                                    <button onclick="openModal(${task[0]}, '${task[1]}', '${task[2]}')">Update</button>
                                 </td>
                             </tr>
                         `;
                     });
-                    document.getElementById('pageInfo').innerText = `Page ${data.page} of ${data.totalPages}`;
+
+                    document.getElementById('paginationInfo').innerText = `Page ${data.current_page} of ${data.total_pages}`;
+                    document.getElementById('prevPage').disabled = data.current_page === 1;
+                    document.getElementById('nextPage').disabled = data.current_page === data.total_pages;
+
+                    currentPage = data.current_page;
                 });
         }
 
-        // Change page for pagination
-        function changePage(direction) {
-            if (direction === 'prev' && currentPage > 1) {
-                currentPage--;
-            } else if (direction === 'next') {
-                currentPage++;
+        function prevPage() {
+            if (currentPage > 1) {
+                fetchTasks(currentPage - 1);
             }
-            fetchTasks();
         }
 
-        // Add a new task
+        function nextPage() {
+            fetchTasks(currentPage + 1);
+        }
+
         function addTask() {
             const name = document.getElementById('taskName').value;
             const desc = document.getElementById('taskDesc').value;
+            const deadline = document.getElementById('taskDeadline').value;
             fetch('/tasks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name, description: desc })
+                body: JSON.stringify({ name: name, description: desc, deadline: deadline })
             }).then(response => {
                 if (response.ok) {
                     fetchTasks();
                     document.getElementById('taskName').value = '';
                     document.getElementById('taskDesc').value = '';
+                    document.getElementById('taskDeadline').value = '';
                 }
             });
         }
-
-        // Delete a task
-        function deleteTask(taskId) {
-            fetch(`/tasks/${taskId}`, { method: 'DELETE' })
-                .then(response => {
-                    if (response.ok) fetchTasks();
-                });
-        }
-
         // Open modal to update task
-        function openModal(taskId, taskName, taskDesc) {
+        function openModal(taskId, taskName, taskDesc, taskDeadline) {
             updateTaskId = taskId;
             document.getElementById('updateTaskName').value = taskName;
             document.getElementById('updateTaskDesc').value = taskDesc;
+            document.getElementById('updateTaskDeadline').value = taskDeadline;
             document.getElementById('updateModal').style.display = 'block';
         }
 
@@ -180,10 +181,11 @@
         function confirmUpdate() {
             const name = document.getElementById('updateTaskName').value;
             const desc = document.getElementById('updateTaskDesc').value;
+            const deadline = document.getElementById('updateTaskDeadline').value;
             fetch(`/tasks/${updateTaskId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name, description: desc })
+                body: JSON.stringify({ name: name, description: desc, deadline: deadline })
             }).then(response => {
                 if (response.ok) {
                     fetchTasks();
@@ -195,7 +197,13 @@
             });
         }
 
-        // Handle Excel import
+        function deleteTask(taskId) {
+            fetch(`/tasks/${taskId}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) fetchTasks();
+                });
+        }
+
         document.getElementById('importForm').onsubmit = function(event) {
             event.preventDefault();
             const formData = new FormData(this);
@@ -212,7 +220,6 @@
             });
         };
 
-        // Load tasks on page load
         window.onload = fetchTasks;
     </script>
 </body>
