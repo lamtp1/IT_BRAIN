@@ -55,6 +55,8 @@
         <input id="taskName" type="text" placeholder="Tên đầu việc">
         <textarea id="taskDesc" placeholder="Mô tả đầu việc"></textarea>
         <input id="taskDeadline" type="date" placeholder="Deadline">
+        <input id="taskEmail" type="email" placeholder="Email">
+        <input id="taskEmployee" type="text" placeholder="Tên nhân viên">
         <button onclick="addTask()">Thêm đầu việc</button>
     </div>
 
@@ -74,6 +76,8 @@
                 <th>Tên</th>
                 <th>Mô tả</th>
                 <th>Deadline</th>
+                <th>Email</th>
+                <th>Tên nhân viên</th>
                 <th>Hành động</th>
             </tr>
         </thead>
@@ -90,6 +94,8 @@
             <input id="updateTaskName" type="text" placeholder="Tên mới">
             <textarea id="updateTaskDesc" placeholder="Mô tả mới"></textarea>
             <input id="updateTaskDeadline" type="date" placeholder="Deadline mới">
+            <input id="updateTaskEmail" type="email" placeholder="Email mới">
+            <input id="updateTaskEmployee" type="text" placeholder="Tên nhân viên mới">
             <button onclick="confirmUpdate()">Xác nhận</button>
         </div>
     </div>
@@ -106,7 +112,6 @@
         const tasksPerPage = 10;
         let updateTaskId = null;
 
-        // Fetch and display tasks with pagination
         function fetchTasks(page = 1) {
             fetch(`/tasks?page=${page}`)
                 .then(response => response.json())
@@ -120,8 +125,10 @@
                                 <td>${task[1]}</td>
                                 <td>${task[2]}</td>
                                 <td>${task[3]}</td>
+                                <td>${task[4]}</td>
+                                <td>${task[5]}</td>
                                 <td>
-                                    <button onclick="openModal(${task[0]}, '${task[1]}', '${task[2]}', '${task[3]}')">Update</button>
+                                    <button onclick="openModal(${task[0]}, '${task[1]}', '${task[2]}', '${task[3]}', '${task[4]}', '${task[5]}')">Update</button>
                                     <button onclick="deleteTask(${task[0]})">Delete</button>
                                 </td>
                             </tr>
@@ -135,7 +142,7 @@
                     currentPage = data.current_page;
                 });
         }
-
+        
         function prevPage() {
             if (currentPage > 1) {
                 fetchTasks(currentPage - 1);
@@ -145,47 +152,50 @@
         function nextPage() {
             fetchTasks(currentPage + 1);
         }
-
         function addTask() {
             const name = document.getElementById('taskName').value;
             const desc = document.getElementById('taskDesc').value;
             const deadline = document.getElementById('taskDeadline').value;
+            const email = document.getElementById('taskEmail').value;
+            const employee = document.getElementById('taskEmployee').value;
+
             fetch('/tasks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name, description: desc, deadline: deadline })
+                body: JSON.stringify({ name, description: desc, deadline, email, employee })
             }).then(response => {
                 if (response.ok) {
                     fetchTasks();
                     document.getElementById('taskName').value = '';
                     document.getElementById('taskDesc').value = '';
                     document.getElementById('taskDeadline').value = '';
+                    document.getElementById('taskEmail').value = '';
+                    document.getElementById('taskEmployee').value = '';
                 }
             });
         }
-        // Open modal to update task
-        function openModal(taskId, taskName, taskDesc, taskDeadline) {
-            updateTaskId = taskId;
-            document.getElementById('updateTaskName').value = taskName;
-            document.getElementById('updateTaskDesc').value = taskDesc;
-            document.getElementById('updateTaskDeadline').value = taskDeadline;
+
+        function openModal(id, name, desc, deadline, email, employee) {
+            updateTaskId = id;
+            document.getElementById('updateTaskName').value = name;
+            document.getElementById('updateTaskDesc').value = desc;
+            document.getElementById('updateTaskDeadline').value = deadline;
+            document.getElementById('updateTaskEmail').value = email;
+            document.getElementById('updateTaskEmployee').value = employee;
             document.getElementById('updateModal').style.display = 'block';
         }
 
-        // Close modal
-        function closeModal() {
-            document.getElementById('updateModal').style.display = 'none';
-        }
-
-        // Confirm update task
         function confirmUpdate() {
             const name = document.getElementById('updateTaskName').value;
             const desc = document.getElementById('updateTaskDesc').value;
             const deadline = document.getElementById('updateTaskDeadline').value;
+            const email = document.getElementById('updateTaskEmail').value;
+            const employee = document.getElementById('updateTaskEmployee').value;
+
             fetch(`/tasks/${updateTaskId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name, description: desc, deadline: deadline })
+                body: JSON.stringify({ name, description: desc, deadline, email, employee })
             }).then(response => {
                 if (response.ok) {
                     fetchTasks();
@@ -195,6 +205,10 @@
                     alert('Cập nhật thất bại!');
                 }
             });
+        }
+
+        function closeModal() {
+            document.getElementById('updateModal').style.display = 'none';
         }
 
         function deleteTask(taskId) {
