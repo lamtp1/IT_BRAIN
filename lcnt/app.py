@@ -14,9 +14,9 @@ import time
 app = Flask(__name__)
 
 # Cấu hình MySQL
-app.config['MYSQL_HOST'] = '127.0.0.1'
+app.config['MYSQL_HOST'] = '171.229.20.248'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '123456'
+app.config['MYSQL_PASSWORD'] = '123'
 app.config['MYSQL_DB'] = 'task_management'
 mysql = MySQL(app)
 
@@ -198,12 +198,12 @@ def start_notification_thread():
         with app.app_context():  # Push the app context here
             while True:
                 notify_due_tasks()
-                time.sleep(24*60*60)  # Run daily
+                time.sleep(60)  # Run daily
 
     threading.Thread(target=notify, daemon=True).start()
 
 # Start the notification thread
-start_notification_thread()
+# start_notification_thread()
 
 if __name__ == '__main__':
     app.run(debug=True)
