@@ -41,6 +41,7 @@ def index():
 @app.route('/tasks', methods=['GET'])
 def get_tasks():
     page = request.args.get('page', 1, type=int)  # Trang hiện tại (mặc định là trang 1)
+    page_size = request.args.get('page_size', 10, type=int)  # <-- Tham số số bản ghi/trang
     offset = (page - 1) * RESULTS_PER_PAGE
 
     cur = mysql.connection.cursor()
@@ -48,7 +49,7 @@ def get_tasks():
     total_tasks = cur.fetchone()[0]  # Tổng số bản ghi
     total_pages = math.ceil(total_tasks / RESULTS_PER_PAGE)
 
-    cur.execute("SELECT * FROM tasks LIMIT %s OFFSET %s", (RESULTS_PER_PAGE, offset))
+    cur.execute("SELECT * FROM tasks LIMIT %s OFFSET %s", (page_size, offset))
     tasks = cur.fetchall()
     cur.close()
 
@@ -203,7 +204,7 @@ def start_notification_thread():
     threading.Thread(target=notify, daemon=True).start()
 
 # Start the notification thread
-# start_notification_thread()
+start_notification_thread()
 
 if __name__ == '__main__':
     app.run(debug=True)

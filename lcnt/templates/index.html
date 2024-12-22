@@ -27,22 +27,22 @@
             cursor: pointer; 
         }
         button.update { 
-            background-color: #4CAF50; /* Màu xanh cho nút update */
+            background-color: #4CAF50;
             color: white; 
             border: none; 
             border-radius: 4px;
         }
         button.delete { 
-            background-color: #f44336; /* Màu đỏ cho nút delete */
+            background-color: #f44336; 
             color: white; 
             border: none; 
             border-radius: 4px;
         }
         button.update:hover {
-            background-color: #45a049; /* Hiệu ứng hover cho update */
+            background-color: #45a049;
         }
         button.delete:hover {
-            background-color: #d32f2f; /* Hiệu ứng hover cho delete */
+            background-color: #d32f2f;
         }
         input, textarea { 
             width: 100%; 
@@ -51,7 +51,7 @@
         }
         .pagination { 
             margin-top: 10px; 
-            text-align: center; /* Căn giữa phân trang */
+            text-align: center; 
         }
         .pagination button { 
             padding: 5px 10px; 
@@ -88,6 +88,14 @@
             text-decoration: none;
             cursor: pointer;
         }
+        label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        select {
+            padding: 5px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -111,11 +119,29 @@
         <button type="submit">Import</button>
     </form>
 
+    <!-- Chọn số bản ghi/trang -->
+    <div style="margin-top: 20px;">
+        <label for="recordsPerPage">Số bản ghi/trang:</label>
+        <select id="recordsPerPage" onchange="changePageSize()">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+
+    <!-- Nút xóa nhiều -->
+    <button onclick="openDeleteModalMultiple()">Xóa các đầu việc đã chọn</button>
+
     <!-- Bảng hiển thị danh sách công việc -->
     <h2>Danh sách đầu việc</h2>
     <table>
         <thead>
             <tr>
+                <!-- Checkbox ở header để chọn tất cả -->
+                <th>
+                    <input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes(this)">
+                </th>
                 <th>ID</th>
                 <th>Tên</th>
                 <th>Mô tả</th>
@@ -143,7 +169,18 @@
             <button onclick="confirmUpdate()">Xác nhận</button>
         </div>
     </div>
-    
+
+    <!-- Modal xóa nhiều hoặc xóa 1 (tái sử dụng) -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDeleteModal()">&times;</span>
+            <h2>Xác nhận xóa</h2>
+            <p id="deleteMessage">Bạn có chắc chắn muốn xóa các đầu việc đã chọn?</p>
+            <button onclick="confirmDeleteSelected()">Xác nhận</button>
+            <button onclick="closeDeleteModal()">Cancel</button>
+        </div>
+    </div>
+
     <!-- Pagination controls -->
     <div class="pagination">
         <button id="prevPage" onclick="prevPage()">Previous</button>
@@ -153,12 +190,13 @@
 
     <script>
         let currentPage = 1;
-        const tasksPerPage = 10;
+        let currentPageSize = 10; // Mặc định 10
         let updateTaskId = null;
+        let tasksToDelete = []; // Mảng lưu ID các task được chọn
 
         // Fetch and display tasks with pagination
-        function fetchTasks(page = 1) {
-            fetch(`/tasks?page=${page}`)
+        function fetchTasks(page = 1, pageSize = currentPageSize) {
+            fetch(`/tasks?page=${page}&page_size=${pageSize}`)
                 .then(response => response.json())
                 .then(data => {
                     const table = document.getElementById('taskTable');
@@ -166,6 +204,9 @@
                     data.tasks.forEach(task => {
                         table.innerHTML += `
                             <tr>
+                                <td>
+                                    <input type="checkbox" class="taskCheckbox" value="${task[0]}">
+                                </td>
                                 <td>${task[0]}</td>
                                 <td>${task[1]}</td>
                                 <td>${task[2]}</td>
@@ -174,7 +215,8 @@
                                 <td>${task[5]}</td>
                                 <td>
                                     <button class="update" onclick="openModal(${task[0]}, '${task[1]}', '${task[2]}', '${task[3]}', '${task[4]}', '${task[5]}')">Update</button>
-                                    <button class="delete" onclick="deleteTask(${task[0]})">Delete</button>
+                                    <!-- Gọi hàm openDeleteModalSingle thay vì deleteTask trực tiếp -->
+                                    <button class="delete" onclick="openDeleteModalSingle(${task[0]})">Delete</button>
                                 </td>
                             </tr>
                         `;
@@ -188,14 +230,29 @@
                 });
         }
 
+        // Checkbox header để chọn/bỏ chọn tất cả
+        function toggleAllCheckboxes(source) {
+            const checkboxes = document.querySelectorAll('.taskCheckbox');
+            for (let i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+
+        // Đổi số bản ghi/trang
+        function changePageSize() {
+            const pageSize = document.getElementById('recordsPerPage').value;
+            currentPageSize = parseInt(pageSize);
+            fetchTasks(1, currentPageSize);
+        }
+
         function prevPage() {
             if (currentPage > 1) {
-                fetchTasks(currentPage - 1);
+                fetchTasks(currentPage - 1, currentPageSize);
             }
         }
 
         function nextPage() {
-            fetchTasks(currentPage + 1);
+            fetchTasks(currentPage + 1, currentPageSize);
         }
 
         function addTask() {
@@ -208,10 +265,17 @@
             fetch('/tasks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name, description: desc, deadline: deadline, email: email, employee: employee })
+                body: JSON.stringify({ 
+                    name: name, 
+                    description: desc, 
+                    deadline: deadline, 
+                    email: email, 
+                    employee: employee 
+                })
             }).then(response => {
                 if (response.ok) {
                     fetchTasks();
+                    // Reset form
                     document.getElementById('taskName').value = '';
                     document.getElementById('taskDesc').value = '';
                     document.getElementById('taskDeadline').value = '';
@@ -245,10 +309,16 @@
             fetch(`/tasks/${updateTaskId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name, description: desc, deadline: deadline, email: email, employee: employee })
+                body: JSON.stringify({ 
+                    name: name, 
+                    description: desc, 
+                    deadline: deadline, 
+                    email: email, 
+                    employee: employee 
+                })
             }).then(response => {
                 if (response.ok) {
-                    fetchTasks();
+                    fetchTasks(currentPage, currentPageSize);
                     closeModal();
                     alert('Cập nhật thành công!');
                 } else {
@@ -257,13 +327,52 @@
             });
         }
 
+        // Mở modal xóa 1 task
+        function openDeleteModalSingle(taskId) {
+            // Chỉ xóa 1 task
+            tasksToDelete = [taskId];
+            document.getElementById('deleteMessage').innerText = "Bạn có chắc chắn muốn xóa công việc này?";
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        // Mở modal xóa nhiều tasks
+        function openDeleteModalMultiple() {
+            // Lấy danh sách checkbox được check
+            const checkboxes = document.querySelectorAll('.taskCheckbox:checked');
+            if (checkboxes.length === 0) {
+                alert('Bạn chưa chọn đầu việc nào để xóa.');
+                return;
+            }
+            tasksToDelete = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+            // Hiển thị modal
+            document.getElementById('deleteMessage').innerText = "Bạn có chắc chắn muốn xóa các đầu việc đã chọn?";
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        // Xác nhận xóa (có thể là 1 hoặc nhiều)
+        function confirmDeleteSelected() {
+            // Xóa từng task
+            tasksToDelete.forEach(id => {
+                deleteTask(id);
+            });
+            closeDeleteModal();
+        }
+
         function deleteTask(taskId) {
             fetch(`/tasks/${taskId}`, { method: 'DELETE' })
                 .then(response => {
-                    if (response.ok) fetchTasks();
+                    if (response.ok) {
+                        fetchTasks(currentPage, currentPageSize);
+                    }
                 });
         }
 
+        // Import file
         document.getElementById('importForm').onsubmit = function(event) {
             event.preventDefault();
             const formData = new FormData(this);
@@ -280,6 +389,7 @@
             });
         };
 
+        // Load trang đầu tiên khi mở
         window.onload = fetchTasks;
     </script>
 </body>
