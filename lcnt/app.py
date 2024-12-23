@@ -199,7 +199,7 @@ def start_notification_thread():
         with app.app_context():  # Push the app context here
             while True:
                 notify_due_tasks()
-                time.sleep(60)  # Run daily
+                time.sleep(24*60*60)  # Run daily
 
     threading.Thread(target=notify, daemon=True).start()
 
@@ -207,4 +207,4 @@ def start_notification_thread():
 start_notification_thread()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000,debug=True)
