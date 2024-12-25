@@ -335,4 +335,4 @@ start_notification_thread()
 
 if __name__ == '__main__':
     # Nếu muốn server lắng nghe ngoài container, đặt host='0.0.0.0'
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000,debug=True)
