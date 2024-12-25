@@ -130,12 +130,20 @@
         </select>
     </div>
 
-    <!-- Nút xóa nhiều -->
-    <button onclick="openDeleteModalMultiple()">Xóa các đầu việc đã chọn</button>
+    <!-- Thanh công cụ tìm kiếm và xóa -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+        <!-- Bên trái: Nút xóa -->
+        <button style="background-color: red; color: white; font-size: 16px; padding: 10px 20px;" onclick="openDeleteModalMultiple()">Xóa các đầu việc đã chọn</button>
+        
+        <!-- Bên phải: Ô tìm kiếm và nút tìm kiếm -->
+        <div style="display: flex; align-items: center;">
+            <input id="searchInput" type="text" placeholder="Nhập tên việc, email hoặc tên nhân viên..." 
+                style="padding: 10px; width: 300px; margin-right: 10px; font-size: 16px; height: 42px; box-sizing: border-box;">
+            <button style="font-size: 16px; padding: 10px 20px; height: 42px;" onclick="searchTasks()">Tìm kiếm</button>
+        </div>
+    </div>
 
-    <!-- Ô tìm kiếm -->
-    <input id="searchInput" type="text" placeholder="Nhập tên việc, email hoặc tên nhân viên...">
-    <button onclick="searchTasks()">Tìm kiếm</button>
+
 
     <!-- Bảng hiển thị danh sách công việc -->
     <h2>Danh sách đầu việc</h2>
@@ -268,7 +276,7 @@
             currentPageSize = parseInt(pageSize);
             fetchTasks(1, currentPageSize, currentSearch);
         }
-        
+
         function addTask() {
             const name = document.getElementById('taskName').value;
             const desc = document.getElementById('taskDesc').value;

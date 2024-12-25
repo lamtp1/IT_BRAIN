@@ -250,7 +250,7 @@ def check_and_send_for_single_task(task_id):
         
         # Nếu deadline còn trong vòng 3 ngày => gửi
         if 0 <= days_left <= 3:
-            task_identifier = f"{email}_{deadline}"
+            task_identifier = f"{task_id}_{deadline}"
             if task_identifier not in sent_emails:
                 # Gửi mail
                 sent_emails.add(task_identifier)
@@ -319,7 +319,7 @@ def start_notification_thread():
     threading.Thread(target=notify, daemon=True).start()
 
 # Bật thread (nếu muốn chạy quét toàn bộ hằng ngày)
-# start_notification_thread()
+start_notification_thread()
 
 if __name__ == '__main__':
     # Nếu muốn server lắng nghe ngoài container, đặt host='0.0.0.0'
