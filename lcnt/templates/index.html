@@ -133,6 +133,10 @@
     <!-- Nút xóa nhiều -->
     <button onclick="openDeleteModalMultiple()">Xóa các đầu việc đã chọn</button>
 
+    <!-- Ô tìm kiếm -->
+    <input id="searchInput" type="text" placeholder="Nhập tên việc, email hoặc tên nhân viên...">
+    <button onclick="searchTasks()">Tìm kiếm</button>
+
     <!-- Bảng hiển thị danh sách công việc -->
     <h2>Danh sách đầu việc</h2>
     <table>
@@ -193,10 +197,13 @@
         let currentPageSize = 10; // Mặc định 10
         let updateTaskId = null;
         let tasksToDelete = []; // Mảng lưu ID các task được chọn
+        let currentSearch = ''; // Biến toàn cục lưu giá trị search
 
         // Fetch and display tasks with pagination
-        function fetchTasks(page = 1, pageSize = currentPageSize) {
-            fetch(`/tasks?page=${page}&page_size=${pageSize}`)
+        function fetchTasks(page = 1, pageSize = currentPageSize, search = currentSearch) {
+        // Encode search để tránh lỗi URL
+            const encodedSearch = encodeURIComponent(search);
+            fetch(`/tasks?page=${page}&page_size=${pageSize}&search=${encodedSearch}`)
                 .then(response => response.json())
                 .then(data => {
                     const table = document.getElementById('taskTable');
@@ -215,7 +222,6 @@
                                 <td>${task[5]}</td>
                                 <td>
                                     <button class="update" onclick="openModal(${task[0]}, '${task[1]}', '${task[2]}', '${task[3]}', '${task[4]}', '${task[5]}')">Update</button>
-                                    <!-- Gọi hàm openDeleteModalSingle thay vì deleteTask trực tiếp -->
                                     <button class="delete" onclick="openDeleteModalSingle(${task[0]})">Delete</button>
                                 </td>
                             </tr>
@@ -238,23 +244,31 @@
             }
         }
 
-        // Đổi số bản ghi/trang
-        function changePageSize() {
-            const pageSize = document.getElementById('recordsPerPage').value;
-            currentPageSize = parseInt(pageSize);
-            fetchTasks(1, currentPageSize);
-        }
+        function searchTasks() {
+            const input = document.getElementById('searchInput').value;
+            currentSearch = input;
+        // Mỗi lần search, ta quay lại trang 1
+            fetchTasks(1, currentPageSize, currentSearch);
+        }   
 
+        // Đổi số bản ghi/trang
         function prevPage() {
             if (currentPage > 1) {
-                fetchTasks(currentPage - 1, currentPageSize);
+                fetchTasks(currentPage - 1, currentPageSize, currentSearch);
             }
         }
 
         function nextPage() {
-            fetchTasks(currentPage + 1, currentPageSize);
+            fetchTasks(currentPage + 1, currentPageSize, currentSearch);
         }
 
+        // Hàm changePageSize() cũng truyền thêm currentSearch
+        function changePageSize() {
+            const pageSize = document.getElementById('recordsPerPage').value;
+            currentPageSize = parseInt(pageSize);
+            fetchTasks(1, currentPageSize, currentSearch);
+        }
+        
         function addTask() {
             const name = document.getElementById('taskName').value;
             const desc = document.getElementById('taskDesc').value;

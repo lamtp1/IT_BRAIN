@@ -41,15 +41,44 @@ def index():
 def get_tasks():
     page = request.args.get('page', 1, type=int)
     page_size = request.args.get('page_size', RESULTS_PER_PAGE, type=int)
+    search = request.args.get('search', '').strip()  # <-- Lấy keyword tìm kiếm (mặc định là rỗng)
 
     offset = (page - 1) * page_size
     cur = mysql.connection.cursor()
-    cur.execute("SELECT COUNT(*) FROM tasks")
-    total_tasks = cur.fetchone()[0]
-    total_pages = math.ceil(total_tasks / page_size)
 
-    cur.execute("SELECT * FROM tasks LIMIT %s OFFSET %s", (page_size, offset))
-    tasks = cur.fetchall()
+    # Nếu search có nội dung, ta thêm điều kiện WHERE
+    if search:
+        # Đếm tổng số bản ghi phù hợp
+        count_query = """
+            SELECT COUNT(*) 
+            FROM tasks 
+            WHERE name LIKE %s OR email LIKE %s OR employee LIKE %s
+        """
+        like_str = f"%{search}%"
+        cur.execute(count_query, (like_str, like_str, like_str))
+        total_tasks = cur.fetchone()[0]
+        
+        # Tính total_pages
+        total_pages = math.ceil(total_tasks / page_size) if page_size > 0 else 1
+        
+        # Lấy bản ghi phù hợp, có LIMIT + OFFSET
+        data_query = """
+            SELECT * 
+            FROM tasks 
+            WHERE name LIKE %s OR email LIKE %s OR employee LIKE %s
+            LIMIT %s OFFSET %s
+        """
+        cur.execute(data_query, (like_str, like_str, like_str, page_size, offset))
+        tasks = cur.fetchall()
+    else:
+        # Không có search => lấy tất cả như cũ
+        cur.execute("SELECT COUNT(*) FROM tasks")
+        total_tasks = cur.fetchone()[0]
+        total_pages = math.ceil(total_tasks / page_size) if page_size > 0 else 1
+
+        cur.execute("SELECT * FROM tasks LIMIT %s OFFSET %s", (page_size, offset))
+        tasks = cur.fetchall()
+
     cur.close()
 
     return jsonify({
@@ -290,7 +319,7 @@ def start_notification_thread():
     threading.Thread(target=notify, daemon=True).start()
 
 # Bật thread (nếu muốn chạy quét toàn bộ hằng ngày)
-start_notification_thread()
+# start_notification_thread()
 
 if __name__ == '__main__':
     # Nếu muốn server lắng nghe ngoài container, đặt host='0.0.0.0'
