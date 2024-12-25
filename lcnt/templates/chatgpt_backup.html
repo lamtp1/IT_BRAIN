@@ -413,21 +413,21 @@
                 });
         }
 
-        // function fetchEmailsSentCount() {
-        //     fetch('/emails_sent_count')
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             // data.count = số mail đã gửi
-        //             document.getElementById('emailsSentCount').innerText = data.count;
-        //         })
-        //         .catch(err => console.error('Lỗi fetchEmailsSentCount:', err));
-        // }
+        function fetchEmailsSentCount() {
+            fetch('/emails_sent_count')
+                .then(response => response.json())
+                .then(data => {
+                    // data.count = số mail đã gửi
+                    document.getElementById('emailsSentCount').innerText = data.count;
+                })
+                .catch(err => console.error('Lỗi fetchEmailsSentCount:', err));
+        }
 
-        // // Cập nhật hiển thị 10s/lần (tùy bạn chọn chu kỳ)
-        // setInterval(fetchEmailsSentCount, 5000);
+        // Cập nhật hiển thị 10s/lần (tùy bạn chọn chu kỳ)
+        setInterval(fetchEmailsSentCount, 5000);
 
-        // // Gọi ngay 1 lần khi load trang
-        // fetchEmailsSentCount();
+        // Gọi ngay 1 lần khi load trang
+        fetchEmailsSentCount();
         // Import file
         document.getElementById('importForm').onsubmit = function(event) {
             event.preventDefault();
