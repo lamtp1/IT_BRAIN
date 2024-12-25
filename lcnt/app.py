@@ -12,6 +12,8 @@ import time
 
 app = Flask(__name__)
 
+emails_sent_count = 0  # ★ Biến đếm tổng số mail đã gửi
+
 # Cấu hình MySQL
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'root'
@@ -151,6 +153,11 @@ def update_task(task_id):
 
     return jsonify({'message': 'Task updated successfully'}), 200
 
+@app.route('/emails_sent_count', methods=['GET'])
+def get_emails_sent_count():
+    global emails_sent_count
+    return jsonify({'count': emails_sent_count})
+
 @app.route('/tasks/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
     cur = mysql.connection.cursor()
@@ -208,6 +215,7 @@ def import_excel():
 # --- HÀM GỬI MAIL ---
 
 def send_email(recipient, subject, content):
+    global emails_sent_count
     msg = MIMEMultipart()
     msg["From"] = SMTP_EMAIL
     msg["To"] = recipient
@@ -220,6 +228,10 @@ def send_email(recipient, subject, content):
         server.login(SMTP_EMAIL, SMTP_PASSWORD)
         server.sendmail(SMTP_EMAIL, recipient, msg.as_string())
         print(f"Email sent to {recipient}")
+        
+        # Mỗi lần gửi thành công, tăng biến đếm 1
+        emails_sent_count += 1
+
     except Exception as e:
         print(f"Failed to send email to {recipient}: {e}")
     finally:

@@ -96,6 +96,21 @@
             padding: 5px;
             margin-bottom: 10px;
         }
+
+        #emailsSentBox {
+            position: fixed;       /* Giữ cố định trên màn hình */
+            bottom: 10px;          /* Cách đáy 10px */
+            right: 10px;           /* Cách phải 10px */
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+        }
+
+    </style>
     </style>
 </head>
 <body>
@@ -198,6 +213,10 @@
         <button id="prevPage" onclick="prevPage()">Previous</button>
         <span id="paginationInfo"></span>
         <button id="nextPage" onclick="nextPage()">Next</button>
+    </div>
+
+    <div id="emailsSentBox">
+        <span>Số mail đã gửi: </span><span id="emailsSentCount">0</span>
     </div>
 
     <script>
@@ -394,6 +413,21 @@
                 });
         }
 
+        function fetchEmailsSentCount() {
+            fetch('/emails_sent_count')
+                .then(response => response.json())
+                .then(data => {
+                    // data.count = số mail đã gửi
+                    document.getElementById('emailsSentCount').innerText = data.count;
+                })
+                .catch(err => console.error('Lỗi fetchEmailsSentCount:', err));
+        }
+
+        // Cập nhật hiển thị 10s/lần (tùy bạn chọn chu kỳ)
+        setInterval(fetchEmailsSentCount, 5000);
+
+        // Gọi ngay 1 lần khi load trang
+        fetchEmailsSentCount();
         // Import file
         document.getElementById('importForm').onsubmit = function(event) {
             event.preventDefault();
