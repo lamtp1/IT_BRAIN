@@ -85,9 +85,77 @@ def get_emails_sent_count():
     global emails_sent_count
     return jsonify({'count': emails_sent_count})
 
-@app.route('/')
-def index():
-    return render_template('chatgpt_backup.html')
+# @app.route('/')
+# def index():
+#     return render_template('chatgpt_backup.html')
+
+@app.route('/', methods=['GET'])
+def view_khlcnt():
+    """
+    Lấy dữ liệu từ bảng 'khlcnt' và hiển thị lên giao diện.
+    """
+    try:
+        # Kết nối và thực hiện truy vấn
+        cur = mysql.connection.cursor()
+        query = """
+        SELECT 
+            mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
+            step1_kh, step1_ngay_htthucte, step1_trang_thai,
+            step2_kh, step2_ngay_htthucte, step2_trang_thai,
+            step3_kh, step3_ngay_htthucte, step3_trang_thai,
+            step4_kh, step4_ngay_htthucte, step4_trang_thai,
+            step5_kh, step5_ngay_htthucte, step5_trang_thai,
+            step6_kh, step6_ngay_htthucte, step6_trang_thai,
+            step7_kh, step7_ngay_htthucte, step7_trang_thai,
+            step8_kh, step8_ngay_htthucte, step8_trang_thai,
+            step9_kh, step9_ngay_htthucte, step9_trang_thai,
+            step10_kh, step10_ngay_htthucte, step10_trang_thai,
+            step11_kh, step11_ngay_htthucte, step11_trang_thai,
+            step12_kh, step12_ngay_htthucte, step12_trang_thai,
+            step13_kh, step13_ngay_htthucte, step13_trang_thai,
+            step14_kh, step14_ngay_htthucte, step14_trang_thai,
+            step15_kh, step15_ngay_htthucte, step15_trang_thai,
+            step16_kh, step16_ngay_htthucte, step16_trang_thai,
+            step17_kh, step17_ngay_htthucte, step17_trang_thai,
+            step18_kh, step18_ngay_htthucte, step18_trang_thai,
+            step19_kh, step19_ngay_htthucte, step19_trang_thai,
+            hang_ve_kho, nhan_su_to_chuyen_gia, email
+        FROM khlcnt
+        """
+        cur.execute(query)
+        rows = cur.fetchall()
+        cur.close()
+
+        # Tên cột hiển thị
+        columns = [
+            "Mạng", "Dự án", "Tên gói thầu", "Thời gian bắt đầu LCNT", "Mức ưu tiên",
+            "Step 1 KH", "Step 1 Ngày HT TT", "Step 1 Trạng thái",
+            "Step 2 KH", "Step 2 Ngày HT TT", "Step 2 Trạng thái",
+            "Step 3 KH", "Step 3 Ngày HT TT", "Step 3 Trạng thái",
+            "Step 4 KH", "Step 4 Ngày HT TT", "Step 4 Trạng thái",
+            "Step 5 KH", "Step 5 Ngày HT TT", "Step 5 Trạng thái",
+            "Step 6 KH", "Step 6 Ngày HT TT", "Step 6 Trạng thái",
+            "Step 7 KH", "Step 7 Ngày HT TT", "Step 7 Trạng thái",
+            "Step 8 KH", "Step 8 Ngày HT TT", "Step 8 Trạng thái",
+            "Step 9 KH", "Step 9 Ngày HT TT", "Step 9 Trạng thái",
+            "Step 10 KH", "Step 10 Ngày HT TT", "Step 10 Trạng thái",
+            "Step 11 KH", "Step 11 Ngày HT TT", "Step 11 Trạng thái",
+            "Step 12 KH", "Step 12 Ngày HT TT", "Step 12 Trạng thái",
+            "Step 13 KH", "Step 13 Ngày HT TT", "Step 13 Trạng thái",
+            "Step 14 KH", "Step 14 Ngày HT TT", "Step 14 Trạng thái",
+            "Step 15 KH", "Step 15 Ngày HT TT", "Step 15 Trạng thái",
+            "Step 16 KH", "Step 16 Ngày HT TT", "Step 16 Trạng thái",
+            "Step 17 KH", "Step 17 Ngày HT TT", "Step 17 Trạng thái",
+            "Step 18 KH", "Step 18 Ngày HT TT", "Step 18 Trạng thái",
+            "Step 19 KH", "Step 19 Ngày HT TT", "Step 19 Trạng thái",
+            "Hàng về kho", "Nhân sự tổ chuyên gia", "Email"
+        ]
+
+        # Truyền dữ liệu tới template
+        return render_template('chatgpt_backup.html', columns=columns, rows=rows)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 # ==================  ROUTE IMPORT EXCEL  ==================
 @app.route('/import_khlcnt', methods=['POST'])

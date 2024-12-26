@@ -8,18 +8,17 @@
             color: #333; 
             text-align: center; /* Căn giữa tiêu đề */
         }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 20px 0; 
+        table {
+        border-collapse: collapse;
+        width: 100%;
         }
-        th, td { 
-            border: 1px solid #ccc; 
-            padding: 10px; 
-            text-align: center; 
+        th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
         }
-        th { 
-            background-color: #f4f4f4; 
+        th {
+        background-color: #f4f4f4;
         }
         button { 
             padding: 5px 10px; 
@@ -111,7 +110,6 @@
         }
 
     </style>
-    </style>
 </head>
 <body>
     <h1>Quản lý công việc P.CNTT - KTTC</h1>
@@ -161,26 +159,25 @@
 
 
     <!-- Bảng hiển thị danh sách công việc -->
-    <h2>Danh sách đầu việc</h2>
+    <h1>Danh sách KHLCNT (Theo cột Excel)</h1>
+
     <table>
-        <thead>
-            <tr>
-                <!-- Checkbox ở header để chọn tất cả -->
-                <th>
-                    <input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes(this)">
-                </th>
-                <th>ID</th>
-                <th>Tên</th>
-                <th>Mô tả</th>
-                <th>Deadline</th>
-                <th>Email</th>
-                <th>Tên nhân viên</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody id="taskTable">
-            <!-- Task data will be loaded here -->
-        </tbody>
+      <thead>
+        <tr>
+          {% for col in columns_excel %}
+            <th>{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in data_rows %}
+          <tr>
+            {% for val in row %}
+              <td>{{ val }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
     </table>
 
     <!-- Modal for updating task -->
