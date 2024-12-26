@@ -1,15 +1,67 @@
 import os
 import smtplib
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
 from flask_mysqldb import MySQL
 import pandas as pd
 from datetime import datetime, date
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import MySQLdb.cursors
 
 app = Flask(__name__)
+app.secret_key = 'cntt@123'  # cần cho session
 
 emails_sent_count = 0  # ★ Biến đếm tổng số mail đã gửi
+
+# ==================  CẤU HÌNH MÀN LOGIN  ==================
+@app.route('/')
+def index():
+    # Trang chủ, nếu chưa login -> chuyển sang /login
+    if 'loggedin' in session:
+        return redirect(url_for('view_khlcnt'))
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """
+    Nếu GET: hiển thị form đăng nhập
+    Nếu POST: lấy username/password, check DB -> nếu đúng -> session -> redirect
+    """
+    if request.method == 'POST':
+        # Lấy data
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        # Kết nối DB
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # Tìm user
+        cursor.execute("SELECT * FROM users WHERE username=%s AND password=%s", (username, password))
+        account = cursor.fetchone()
+
+        if account:
+            # Tạo session
+            session['loggedin'] = True
+            session['id'] = account['id']
+            session['username'] = account['username']
+
+            flash('Đăng nhập thành công!')
+            return redirect(url_for('index'))
+        else:
+            flash('Sai tài khoản hoặc mật khẩu!')
+            return redirect(url_for('login'))
+    else:
+        # GET -> hiển thị form
+        return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    # Xóa session
+    session.pop('loggedin', None)
+    session.pop('id', None)
+    session.pop('username', None)
+    flash('Đã đăng xuất!')
+    return redirect(url_for('login'))
 
 # ==================  CẤU HÌNH MYSQL  ==================
 app.config['MYSQL_HOST'] = '171.229.20.248'
@@ -89,8 +141,20 @@ def get_emails_sent_count():
 # def index():
 #     return render_template('chatgpt_backup.html')
 
-@app.route('/', methods=['GET'])
+# ==================  Kiểm tra session để đảm bảo chỉ người đã login mới xem được dashboard  ==================
+# @app.route('/dashboard')
+# def dashboard():
+#     if 'loggedin' not in session:
+#         return redirect(url_for('login'))
+#     # Nếu đã login:
+#     # Lấy dữ liệu DB, render template
+#     return render_template('chatgpt_backup.html')
+
+# ==================  Hàm hiển thị dữ liệu  ================================
+@app.route('/dashboard', methods=['GET'])
 def view_khlcnt():
+    if 'loggedin' not in session:
+        return redirect(url_for('login'))    
     """
     Lấy dữ liệu từ bảng 'khlcnt' và hiển thị lên giao diện.
     """
