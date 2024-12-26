@@ -18,11 +18,11 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the application port
-EXPOSE 5000
+EXPOSE 5200
 
 # Set environment variables
-ENV FLASK_APP=app.py
+ENV FLASK_APP=chatgpt_backup.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
 # Start the Flask application
-CMD ["python", "app.py"]
+CMD ["python", "chatgpt_backup.py"]

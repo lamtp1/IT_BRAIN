@@ -390,4 +390,4 @@ def import_khlcnt():
 
 if __name__ == '__main__':
     # Nếu muốn truy cập từ ngoài container, hãy thêm host='0.0.0.0'
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5200,debug=True)

@@ -3,15 +3,15 @@ services:
   # Đặt tên service tùy ý
   lcnt_app_service:
     # Đặt container_name tùy ý
-    container_name: lcnt_app_container
+    container_name: lcnt_real_1
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "5200:5200"
     # Nếu cần truyền các biến môi trường, bạn có thể thêm:
     environment:
-      - FLASK_APP=app.py
+      - FLASK_APP=chatgpt_backup.py
       - FLASK_RUN_HOST=0.0.0.0
     # Có thể tự động khởi động lại nếu container bị stop
     restart: unless-stopped
