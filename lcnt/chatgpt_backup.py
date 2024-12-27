@@ -221,6 +221,33 @@ def view_khlcnt():
         return jsonify({"error": str(e)}), 500
 
 
+#================== HÀM XÓA BẢN GHI ===============================================================
+@app.route('/delete_record', methods=['POST'])
+def delete_record():
+    """
+    Xóa một bản ghi dựa trên id từ bảng khlcnt.
+    """
+    if 'loggedin' not in session:
+        return redirect(url_for('login'))
+
+    # Lấy id từ form
+    id = request.form.get('id')  # Lấy giá trị ID từ dữ liệu POST
+    if not id:
+        flash("ID không hợp lệ!")
+        return redirect(url_for('view_khlcnt'))
+
+    try:
+        cur = mysql.connection.cursor()
+        query = "DELETE FROM khlcnt WHERE id = %s"
+        cur.execute(query, (id,))
+        mysql.connection.commit()
+        cur.close()
+
+        # flash("Xóa thành công!")
+    except Exception as e:
+        flash(f"Lỗi: {str(e)}")
+    return redirect(url_for('view_khlcnt'))
+
 # ==================  ROUTE IMPORT EXCEL  ==================
 @app.route('/import_khlcnt', methods=['POST'])
 def import_khlcnt():
