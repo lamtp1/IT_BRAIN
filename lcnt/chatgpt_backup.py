@@ -413,7 +413,8 @@ def import_khlcnt():
               step17_trang_thai,
               step18_trang_thai,
               step19_trang_thai,
-              du_an
+              du_an,
+              ten_goi_thau
             FROM khlcnt
             WHERE id IN ({",".join(str(i) for i in inserted_ids)})
             """
@@ -422,6 +423,7 @@ def import_khlcnt():
             cur2.close()
 
             for r in rows:
+                ten_goi_thau = r[23]
                 rec_id = r[22]
                 to_email = r[1]
                 to_name  = r[2]  # cột nhan_su_to_chuyen_gia
@@ -437,7 +439,7 @@ def import_khlcnt():
                     subject = f"[Thông báo] {rec_id}"
                     content = f"""
                     <p>Xin chào đ/c {greet},</p>
-                    <p>Dự án {rec_id} có ít nhất 1 bước ở trạng thái Chưa hoàn thành.</p>
+                    <p>Gói thầu {ten_goi_thau} thuộc dự án {rec_id} có ít nhất 1 bước ở trạng thái Chưa hoàn thành.</p>
                     <p>Vui lòng kiểm tra tiến độ!</p>
                     """
                     send_email(to_email, subject, content)
