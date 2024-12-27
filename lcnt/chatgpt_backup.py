@@ -221,6 +221,33 @@ def view_khlcnt():
         return jsonify({"error": str(e)}), 500
 
 
+#================== HÀM XÓA BẢN GHI ===============================================================
+@app.route('/delete_record', methods=['POST'])
+def delete_record():
+    """
+    Xóa một bản ghi dựa trên id từ bảng khlcnt.
+    """
+    if 'loggedin' not in session:
+        return redirect(url_for('login'))
+
+    # Lấy id từ form
+    id = request.form.get('id')  # Lấy giá trị ID từ dữ liệu POST
+    if not id:
+        flash("ID không hợp lệ!")
+        return redirect(url_for('view_khlcnt'))
+
+    try:
+        cur = mysql.connection.cursor()
+        query = "DELETE FROM khlcnt WHERE id = %s"
+        cur.execute(query, (id,))
+        mysql.connection.commit()
+        cur.close()
+
+        # flash("Xóa thành công!")
+    except Exception as e:
+        flash(f"Lỗi: {str(e)}")
+    return redirect(url_for('view_khlcnt'))
+
 # ==================  ROUTE IMPORT EXCEL  ==================
 @app.route('/import_khlcnt', methods=['POST'])
 def import_khlcnt():
@@ -413,7 +440,8 @@ def import_khlcnt():
               step17_trang_thai,
               step18_trang_thai,
               step19_trang_thai,
-              du_an
+              du_an,
+              ten_goi_thau
             FROM khlcnt
             WHERE id IN ({",".join(str(i) for i in inserted_ids)})
             """
@@ -422,6 +450,7 @@ def import_khlcnt():
             cur2.close()
 
             for r in rows:
+                ten_goi_thau = r[23]
                 rec_id = r[22]
                 to_email = r[1]
                 to_name  = r[2]  # cột nhan_su_to_chuyen_gia
@@ -437,7 +466,7 @@ def import_khlcnt():
                     subject = f"[Thông báo] {rec_id}"
                     content = f"""
                     <p>Xin chào đ/c {greet},</p>
-                    <p>Dự án {rec_id} có ít nhất 1 bước ở trạng thái Chưa hoàn thành.</p>
+                    <p>Gói thầu {ten_goi_thau} thuộc dự án {rec_id} có ít nhất 1 bước ở trạng thái Chưa hoàn thành.</p>
                     <p>Vui lòng kiểm tra tiến độ!</p>
                     """
                     send_email(to_email, subject, content)
