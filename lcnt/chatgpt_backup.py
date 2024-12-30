@@ -18,7 +18,7 @@ emails_sent_count = 0  # ★ Biến đếm tổng số mail đã gửi
 def index():
     # Trang chủ, nếu chưa login -> chuyển sang /login
     if 'loggedin' in session:
-        return redirect(url_for('view_khlcnt'))
+        return redirect(url_for('view_khlcnt_test'))
     else:
         return redirect(url_for('login'))
 
@@ -67,7 +67,7 @@ def logout():
 app.config['MYSQL_HOST'] = '171.229.20.248'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = '123'
-app.config['MYSQL_DB'] = 'task_management'  # Tên DB chứa bảng khlcnt, status_lcnt
+app.config['MYSQL_DB'] = 'task_management'  # Tên DB chứa bảng khlcnt_test, status_lcnt
 mysql = MySQL(app)
 
 # ==================  THƯ MỤC UPLOAD  ==================
@@ -107,7 +107,7 @@ def send_email(recipient, subject, content):
     finally:
         server.quit()
 
-# ==================  TÍNH TRẠNG THÁI CHO MỖI STEP  ==================
+# ================== HÀM TÍNH TRẠNG THÁI CHO TASKS  ==================
 def get_status(ngay_htthucte, kh_date):
     """
     Rule:
@@ -152,18 +152,18 @@ def get_emails_sent_count():
 
 # ==================  Hàm hiển thị dữ liệu  ================================
 @app.route('/dashboard', methods=['GET'])
-def view_khlcnt():
+def view_khlcnt_test():
     if 'loggedin' not in session:
         return redirect(url_for('login'))    
     """
-    Lấy dữ liệu từ bảng 'khlcnt' và hiển thị lên giao diện.
+    Lấy dữ liệu từ bảng 'khlcnt_test' và hiển thị lên giao diện.
     """
     try:
         # Kết nối và thực hiện truy vấn
         cur = mysql.connection.cursor()
         query = """
         SELECT 
-            mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
+            id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
             step1_kh, step1_ngay_htthucte, step1_trang_thai,
             step2_kh, step2_ngay_htthucte, step2_trang_thai,
             step3_kh, step3_ngay_htthucte, step3_trang_thai,
@@ -184,48 +184,22 @@ def view_khlcnt():
             step18_kh, step18_ngay_htthucte, step18_trang_thai,
             step19_kh, step19_ngay_htthucte, step19_trang_thai,
             hang_ve_kho, nhan_su_to_chuyen_gia, email
-        FROM khlcnt
+        FROM khlcnt_test
         """
         cur.execute(query)
         rows = cur.fetchall()
         cur.close()
 
-        # Tên cột hiển thị
-        columns = [
-            "Mạng", "Dự án", "Tên gói thầu", "Thời gian bắt đầu LCNT", "Mức ưu tiên",
-            "Step 1 KH", "Step 1 Ngày HT TT", "Step 1 Trạng thái",
-            "Step 2 KH", "Step 2 Ngày HT TT", "Step 2 Trạng thái",
-            "Step 3 KH", "Step 3 Ngày HT TT", "Step 3 Trạng thái",
-            "Step 4 KH", "Step 4 Ngày HT TT", "Step 4 Trạng thái",
-            "Step 5 KH", "Step 5 Ngày HT TT", "Step 5 Trạng thái",
-            "Step 6 KH", "Step 6 Ngày HT TT", "Step 6 Trạng thái",
-            "Step 7 KH", "Step 7 Ngày HT TT", "Step 7 Trạng thái",
-            "Step 8 KH", "Step 8 Ngày HT TT", "Step 8 Trạng thái",
-            "Step 9 KH", "Step 9 Ngày HT TT", "Step 9 Trạng thái",
-            "Step 10 KH", "Step 10 Ngày HT TT", "Step 10 Trạng thái",
-            "Step 11 KH", "Step 11 Ngày HT TT", "Step 11 Trạng thái",
-            "Step 12 KH", "Step 12 Ngày HT TT", "Step 12 Trạng thái",
-            "Step 13 KH", "Step 13 Ngày HT TT", "Step 13 Trạng thái",
-            "Step 14 KH", "Step 14 Ngày HT TT", "Step 14 Trạng thái",
-            "Step 15 KH", "Step 15 Ngày HT TT", "Step 15 Trạng thái",
-            "Step 16 KH", "Step 16 Ngày HT TT", "Step 16 Trạng thái",
-            "Step 17 KH", "Step 17 Ngày HT TT", "Step 17 Trạng thái",
-            "Step 18 KH", "Step 18 Ngày HT TT", "Step 18 Trạng thái",
-            "Step 19 KH", "Step 19 Ngày HT TT", "Step 19 Trạng thái",
-            "Hàng về kho", "Nhân sự tổ chuyên gia", "Email"
-        ]
-
         # Truyền dữ liệu tới template
-        return render_template('chatgpt_backup.html', columns=columns, rows=rows)
+        return render_template('chatgpt_backup.html',  rows=rows)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-#================== HÀM XÓA BẢN GHI ===============================================================
+#================ HÀM XÓA BẢN GHI ===========================================
 @app.route('/delete_record', methods=['POST'])
 def delete_record():
     """
-    Xóa một bản ghi dựa trên id từ bảng khlcnt.
+    Xóa một bản ghi dựa trên id từ bảng khlcnt_test.
     """
     if 'loggedin' not in session:
         return redirect(url_for('login'))
@@ -234,28 +208,78 @@ def delete_record():
     id = request.form.get('id')  # Lấy giá trị ID từ dữ liệu POST
     if not id:
         flash("ID không hợp lệ!")
-        return redirect(url_for('view_khlcnt'))
+        return redirect(url_for('view_khlcnt_test'))
 
     try:
         cur = mysql.connection.cursor()
-        query = "DELETE FROM khlcnt WHERE id = %s"
+        query = "DELETE FROM khlcnt_test WHERE id = %s"
         cur.execute(query, (id,))
         mysql.connection.commit()
         cur.close()
 
-        # flash("Xóa thành công!")
+        flash("Xóa thành công!")
     except Exception as e:
         flash(f"Lỗi: {str(e)}")
-    return redirect(url_for('view_khlcnt'))
+    return redirect(url_for('view_khlcnt_test'))
+
+#=================== HÀM UPDATE BẢN GHI =================================
+@app.route('/khlcnt/<int:record_id>', methods=['PUT'])
+def update_khlcnt(record_id):
+    """
+    Cập nhật 8 trường:
+      - mang
+      - du_an
+      - ten_goi_thau
+      - thoi_gian_bat_dau_lcnt
+      - muc_uu_tien
+      - hang_ve_kho (date)
+      - nhan_su_to_chuyen_gia
+      - email
+    """
+    data = request.json
+    mang = data.get('mang')
+    du_an = data.get('du_an')
+    ten_goi_thau = data.get('ten_goi_thau')
+    thoi_gian_bat_dau_lcnt = data.get('thoi_gian_bat_dau_lcnt')
+    muc_uu_tien = data.get('muc_uu_tien')
+    hang_ve_kho = data.get('hang_ve_kho')
+    nhan_su_to_chuyen_gia = data.get('nhan_su_to_chuyen_gia')
+    email = data.get('email')
+
+    # Update DB
+    try:
+        cur = mysql.connection.cursor()
+        sql = """
+          UPDATE khlcnt 
+          SET 
+            mang=%s,
+            du_an=%s,
+            ten_goi_thau=%s,
+            thoi_gian_bat_dau_lcnt=%s,
+            muc_uu_tien=%s,
+            hang_ve_kho=%s,
+            nhan_su_to_chuyen_gia=%s,
+            email=%s
+          WHERE id=%s
+        """
+        cur.execute(sql, (mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, 
+                          muc_uu_tien, hang_ve_kho, nhan_su_to_chuyen_gia, 
+                          email, record_id))
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify({"message": "Cập nhật thành công"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ==================  ROUTE IMPORT EXCEL  ==================
-@app.route('/import_khlcnt', methods=['POST'])
-def import_khlcnt():
+@app.route('/import_khlcnt_test', methods=['POST'])
+def import_khlcnt_test():
     """
     1) Nhận file Excel (có cột cha/cột con) -> đọc 2 hàng tiêu đề
     2) Map cột -> cột DB
     3) Tính step1_trang_thai ... step19_trang_thai
-    4) Insert vào bảng khlcnt
+    4) Insert vào bảng khlcnt_test
     5) Gửi mail cho các bản ghi có step nào đó = 'Chưa HT_TH' hoặc 'Chưa HT_QH'
     """
     if 'file' not in request.files:
@@ -403,7 +427,7 @@ def import_khlcnt():
             db_cols = list(row_data.keys())  # Tất cả cột ta có
             placeholders = ", ".join(["%s"] * len(db_cols))
             columns_joined = ", ".join(db_cols)
-            insert_sql = f"INSERT INTO khlcnt ({columns_joined}) VALUES ({placeholders})"
+            insert_sql = f"INSERT INTO khlcnt_test ({columns_joined}) VALUES ({placeholders})"
             values_tuple = tuple(row_data[col] for col in db_cols)
             cur.execute(insert_sql, values_tuple)
 
@@ -442,7 +466,7 @@ def import_khlcnt():
               step19_trang_thai,
               du_an,
               ten_goi_thau
-            FROM khlcnt
+            FROM khlcnt_test
             WHERE id IN ({",".join(str(i) for i in inserted_ids)})
             """
             cur2.execute(select_sql)
@@ -466,7 +490,7 @@ def import_khlcnt():
                     subject = f"[Thông báo] {rec_id}"
                     content = f"""
                     <p>Xin chào đ/c {greet},</p>
-                    <p>Gói thầu {ten_goi_thau} thuộc dự án {rec_id} có ít nhất 1 bước ở trạng thái Chưa hoàn thành.</p>
+                    <p>Gói thầu {ten_goi_thau} thuộc Dự án: {rec_id} có ít nhất 1 bước ở trạng thái Chưa hoàn thành.</p>
                     <p>Vui lòng kiểm tra tiến độ!</p>
                     """
                     send_email(to_email, subject, content)

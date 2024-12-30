@@ -272,7 +272,6 @@
                 <tbody>
                     {% for row in rows %}
                     <tr>
-                        <td>{{ row[0] }}</td>
                         <td>{{ row[1] }}</td>
                         <td>{{ row[2] }}</td>
                         <td>{{ row[3] }}</td>
@@ -338,6 +337,13 @@
                         <td>{{ row[63] }}</td>
                         <td>{{ row[64] }}</td>
                         <td>{{ row[65] }}</td>
+                        <td>
+                            <form action="{{ url_for('delete_record') }}" method="POST">
+                                <!-- Truyền id vào input ẩn -->
+                                <input type="hidden" name="id" value="{{ row[0] }}">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa không?');">Xóa</button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -442,7 +448,7 @@
             document.getElementById('importForm').onsubmit = function (event) {
                 event.preventDefault();
                 const formData = new FormData(this);
-                fetch('/import_khlcnt', {
+                fetch('/import_khlcnt_test', {
                     method: 'POST',
                     body: formData
                 }).then(response => {
@@ -454,7 +460,6 @@
                     }
                 });
             };
-
             // Load trang đầu tiên khi mở
             window.onload = fetchTasks;
         </script>
