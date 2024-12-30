@@ -455,6 +455,7 @@
                     if (response.ok) {
                         fetchTasks();
                         alert('Import thành công!');
+                        location.reload()
                     } else {
                         response.json().then(data => alert(data.error || 'Import thất bại!'));
                     }
