@@ -213,6 +213,7 @@
                     <!-- Dòng tiêu đề chính -->
                     <tr>
                         <th rowspan="2"><input type="checkbox" onclick="toggleAll(this)"></th>
+                        <th rowspan="2">Hành động</th>
                         <th rowspan="2">Mảng</th>
                         <th rowspan="2">Dự án</th>
                         <th rowspan="2">Tên gói thầu</th>
@@ -230,8 +231,7 @@
                         <th colspan="3" class="text-center">(10)_Hoàn thiện ký biên bản thương thảo</th>
                         <th colspan="3" class="text-center">(11)_Tờ trình phê duyệt Kết quả LCNT</th>
                         <th colspan="3" class="text-center">(12)_Lấy nhận xét của Pháp chế</th>
-                        <th colspan="3" class="text-center">(13)_Trình Hội đồng đầu tư báo cáo thẩm định kết quả LCNT
-                        </th>
+                        <th colspan="3" class="text-center">(13)_Trình Hội đồng đầu tư báo cáo thẩm định kết quả LCNT</th>
                         <th colspan="3" class="text-center">(14)_Hội đồng ĐT phê duyệt Kết quả LCNT</th>
                         <th colspan="3" class="text-center">(15)_TGĐ phê duyệt_KQLCNT</th>
                         <th colspan="3" class="text-center">(16)_Thông báo KQLCNT và thư trao HĐ</th>
@@ -241,7 +241,7 @@
                         <th rowspan="2">Hàng về kho</th>
                         <th rowspan="2">Nhân sự tổ chuyên gia</th>
                         <th rowspan="2">Email</th>
-                        <th rowspan="2">Hành động</th>
+
                     </tr>
                     <!-- Dòng tiêu đề con -->
                     <tr>
@@ -309,6 +309,28 @@
                     {% for row in rows %}
                     <tr>
                         <td><input type="checkbox" class="taskCheckbox" value="{{ row[0] }}"></td>
+                        <td>
+                            <form action="{{ url_for('delete_record') }}" method="POST">
+                                <!-- Truyền id vào input ẩn -->
+                                <input type="hidden" name="id" value="{{ row[0] }}">
+                                <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Bạn có chắc muốn xóa không?');">Xóa</button>
+                            </form>
+                            <!-- Nút Update (thêm) -->
+                            <button class="btn btn-primary" onclick="openUpdateModal(
+                              '{{ row[0] }}',  /* id */
+                              '{{ row[1] }}',  /* mang */
+                              '{{ row[2] }}',  /* du_an */
+                              '{{ row[3] }}',  /* ten_goi_thau */
+                              '{{ row[4] }}',  /* thoi_gian_bat_dau_lcnt */
+                              '{{ row[5] }}',  /* muc_uu_tien */
+                              '{{ row[63] }}', /* hang_ve_kho */
+                              '{{ row[64] }}', /* nhan_su_to_chuyen_gia */
+                              '{{ row[65] }}'  /* email */
+                            )">
+                                Update
+                            </button>
+                        </td>
                         <td>{{ row[1] }}</td>
                         <td>{{ row[2] }}</td>
                         <td>{{ row[3] }}</td>
@@ -374,28 +396,6 @@
                         <td>{{ row[63] }}</td>
                         <td>{{ row[64] }}</td>
                         <td>{{ row[65] }}</td>
-                        <td>
-                            <form action="{{ url_for('delete_record') }}" method="POST">
-                                <!-- Truyền id vào input ẩn -->
-                                <input type="hidden" name="id" value="{{ row[0] }}">
-                                <button type="submit" class="btn btn-danger"
-                                    onclick="return confirm('Bạn có chắc muốn xóa không?');">Xóa</button>
-                            </form>
-                            <!-- Nút Update (thêm) -->
-                            <button class="btn btn-primary" onclick="openUpdateModal(
-                              '{{ row[0] }}',  /* id */
-                              '{{ row[1] }}',  /* mang */
-                              '{{ row[2] }}',  /* du_an */
-                              '{{ row[3] }}',  /* ten_goi_thau */
-                              '{{ row[4] }}',  /* thoi_gian_bat_dau_lcnt */
-                              '{{ row[5] }}',  /* muc_uu_tien */
-                              '{{ row[63] }}', /* hang_ve_kho */
-                              '{{ row[64] }}', /* nhan_su_to_chuyen_gia */
-                              '{{ row[65] }}'  /* email */
-                            )">
-                                Update
-                            </button>
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -677,7 +677,8 @@
                 fetch('/import_khlcnt_test', {
                     method: 'POST',
                     body: formData
-                }).then(response => {
+                })
+                .then(response => {
                     if (response.ok) {
                         fetchTasks();
                         alert('Import thành công!');
