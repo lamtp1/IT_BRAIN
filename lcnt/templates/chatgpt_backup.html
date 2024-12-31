@@ -231,7 +231,8 @@
                         <th colspan="3" class="text-center">(10)_Hoàn thiện ký biên bản thương thảo</th>
                         <th colspan="3" class="text-center">(11)_Tờ trình phê duyệt Kết quả LCNT</th>
                         <th colspan="3" class="text-center">(12)_Lấy nhận xét của Pháp chế</th>
-                        <th colspan="3" class="text-center">(13)_Trình Hội đồng đầu tư báo cáo thẩm định kết quả LCNT</th>
+                        <th colspan="3" class="text-center">(13)_Trình Hội đồng đầu tư báo cáo thẩm định kết quả LCNT
+                        </th>
                         <th colspan="3" class="text-center">(14)_Hội đồng ĐT phê duyệt Kết quả LCNT</th>
                         <th colspan="3" class="text-center">(15)_TGĐ phê duyệt_KQLCNT</th>
                         <th colspan="3" class="text-center">(16)_Thông báo KQLCNT và thư trao HĐ</th>
@@ -664,6 +665,13 @@
                     .catch(err => console.error('Lỗi fetchEmailsSentCount:', err));
             }
 
+            // Hàm tìm kiếm
+            function searchTasks() {
+                const keyword = document.getElementById('searchInput').value;
+                // Chuyển hướng (redirect) đến /dashboard kèm query ?search=...
+                window.location.href = '/dashboard?search=' + encodeURIComponent(keyword);
+            }
+
             // Cập nhật hiển thị 10s/lần (tùy bạn chọn chu kỳ)
             setInterval(fetchEmailsSentCount, 5000);
 
@@ -674,19 +682,19 @@
             document.getElementById('importForm').onsubmit = function (event) {
                 event.preventDefault();
                 const formData = new FormData(this);
-                fetch('/import_khlcnt_test', {
+                fetch('/import_khlcnt', {
                     method: 'POST',
                     body: formData
                 })
-                .then(response => {
-                    if (response.ok) {
-                        fetchTasks();
-                        alert('Import thành công!');
-                        location.reload()
-                    } else {
-                        response.json().then(data => alert(data.error || 'Import thất bại!'));
-                    }
-                });
+                    .then(response => {
+                        if (response.ok) {
+                            fetchTasks();
+                            alert('Import thành công!');
+                            location.reload()
+                        } else {
+                            response.json().then(data => alert(data.error || 'Import thất bại!'));
+                        }
+                    });
             };
             // Load trang đầu tiên khi mở
             window.onload = fetchTasks;

@@ -18,7 +18,7 @@ emails_sent_count = 0  # ★ Biến đếm tổng số mail đã gửi
 def index():
     # Trang chủ, nếu chưa login -> chuyển sang /login
     if 'loggedin' in session:
-        return redirect(url_for('view_khlcnt_test'))
+        return redirect(url_for('view_khlcnt'))
     else:
         return redirect(url_for('login'))
 
@@ -67,7 +67,7 @@ def logout():
 app.config['MYSQL_HOST'] = '171.229.20.248'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = '123'
-app.config['MYSQL_DB'] = 'task_management'  # Tên DB chứa bảng khlcnt_test, status_lcnt
+app.config['MYSQL_DB'] = 'task_management'  # Tên DB chứa bảng khlcnt, status_lcnt
 mysql = MySQL(app)
 
 # ==================  THƯ MỤC UPLOAD  ==================
@@ -153,41 +153,78 @@ def get_emails_sent_count():
 
 # ==================  Hàm hiển thị dữ liệu  ================================
 @app.route('/dashboard', methods=['GET'])
-def view_khlcnt_test():
+def view_khlcnt():
     if 'loggedin' not in session:
         return redirect(url_for('login'))    
     """
-    Lấy dữ liệu từ bảng 'khlcnt_test' và hiển thị lên giao diện.
+    Lấy dữ liệu từ bảng 'khlcnt' và hiển thị lên giao diện.
     """
+    # Lấy từ khoá search từ query params
+    q = request.args.get('search', '').strip()
     try:
         # Kết nối và thực hiện truy vấn
         cur = mysql.connection.cursor()
-        query = """
-        SELECT 
-            id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
-            step1_kh, step1_ngay_htthucte, step1_trang_thai,
-            step2_kh, step2_ngay_htthucte, step2_trang_thai,
-            step3_kh, step3_ngay_htthucte, step3_trang_thai,
-            step4_kh, step4_ngay_htthucte, step4_trang_thai,
-            step5_kh, step5_ngay_htthucte, step5_trang_thai,
-            step6_kh, step6_ngay_htthucte, step6_trang_thai,
-            step7_kh, step7_ngay_htthucte, step7_trang_thai,
-            step8_kh, step8_ngay_htthucte, step8_trang_thai,
-            step9_kh, step9_ngay_htthucte, step9_trang_thai,
-            step10_kh, step10_ngay_htthucte, step10_trang_thai,
-            step11_kh, step11_ngay_htthucte, step11_trang_thai,
-            step12_kh, step12_ngay_htthucte, step12_trang_thai,
-            step13_kh, step13_ngay_htthucte, step13_trang_thai,
-            step14_kh, step14_ngay_htthucte, step14_trang_thai,
-            step15_kh, step15_ngay_htthucte, step15_trang_thai,
-            step16_kh, step16_ngay_htthucte, step16_trang_thai,
-            step17_kh, step17_ngay_htthucte, step17_trang_thai,
-            step18_kh, step18_ngay_htthucte, step18_trang_thai,
-            step19_kh, step19_ngay_htthucte, step19_trang_thai,
-            hang_ve_kho, nhan_su_to_chuyen_gia, email
-        FROM khlcnt_test
-        """
-        cur.execute(query)
+        if q:
+            query = """
+            SELECT 
+                id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
+                step1_kh, step1_ngay_htthucte, step1_trang_thai,
+                step2_kh, step2_ngay_htthucte, step2_trang_thai,
+                step3_kh, step3_ngay_htthucte, step3_trang_thai,
+                step4_kh, step4_ngay_htthucte, step4_trang_thai,
+                step5_kh, step5_ngay_htthucte, step5_trang_thai,
+                step6_kh, step6_ngay_htthucte, step6_trang_thai,
+                step7_kh, step7_ngay_htthucte, step7_trang_thai,
+                step8_kh, step8_ngay_htthucte, step8_trang_thai,
+                step9_kh, step9_ngay_htthucte, step9_trang_thai,
+                step10_kh, step10_ngay_htthucte, step10_trang_thai,
+                step11_kh, step11_ngay_htthucte, step11_trang_thai,
+                step12_kh, step12_ngay_htthucte, step12_trang_thai,
+                step13_kh, step13_ngay_htthucte, step13_trang_thai,
+                step14_kh, step14_ngay_htthucte, step14_trang_thai,
+                step15_kh, step15_ngay_htthucte, step15_trang_thai,
+                step16_kh, step16_ngay_htthucte, step16_trang_thai,
+                step17_kh, step17_ngay_htthucte, step17_trang_thai,
+                step18_kh, step18_ngay_htthucte, step18_trang_thai,
+                step19_kh, step19_ngay_htthucte, step19_trang_thai,
+                hang_ve_kho, nhan_su_to_chuyen_gia, email
+            FROM khlcnt
+            WHERE 
+                (mang LIKE %s
+                 OR du_an LIKE %s
+                 OR ten_goi_thau LIKE %s
+                 OR nhan_su_to_chuyen_gia LIKE %s)
+            """
+            like_pattern = f"%{q}%"
+            cur.execute(query, (like_pattern, like_pattern, like_pattern, like_pattern))
+        else:
+            # Nếu không có search => lấy tất cả
+            query = """
+            SELECT 
+                id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
+                step1_kh, step1_ngay_htthucte, step1_trang_thai,
+                step2_kh, step2_ngay_htthucte, step2_trang_thai,
+                step3_kh, step3_ngay_htthucte, step3_trang_thai,
+                step4_kh, step4_ngay_htthucte, step4_trang_thai,
+                step5_kh, step5_ngay_htthucte, step5_trang_thai,
+                step6_kh, step6_ngay_htthucte, step6_trang_thai,
+                step7_kh, step7_ngay_htthucte, step7_trang_thai,
+                step8_kh, step8_ngay_htthucte, step8_trang_thai,
+                step9_kh, step9_ngay_htthucte, step9_trang_thai,
+                step10_kh, step10_ngay_htthucte, step10_trang_thai,
+                step11_kh, step11_ngay_htthucte, step11_trang_thai,
+                step12_kh, step12_ngay_htthucte, step12_trang_thai,
+                step13_kh, step13_ngay_htthucte, step13_trang_thai,
+                step14_kh, step14_ngay_htthucte, step14_trang_thai,
+                step15_kh, step15_ngay_htthucte, step15_trang_thai,
+                step16_kh, step16_ngay_htthucte, step16_trang_thai,
+                step17_kh, step17_ngay_htthucte, step17_trang_thai,
+                step18_kh, step18_ngay_htthucte, step18_trang_thai,
+                step19_kh, step19_ngay_htthucte, step19_trang_thai,
+                hang_ve_kho, nhan_su_to_chuyen_gia, email
+            FROM khlcnt
+            """
+            cur.execute(query)
         rows = cur.fetchall()
         cur.close()
 
@@ -200,7 +237,7 @@ def view_khlcnt_test():
 @app.route('/delete_record', methods=['POST'])
 def delete_record():
     """
-    Xóa một bản ghi dựa trên id từ bảng khlcnt_test.
+    Xóa một bản ghi dựa trên id từ bảng khlcnt.
     """
     if 'loggedin' not in session:
         return redirect(url_for('login'))
@@ -209,11 +246,11 @@ def delete_record():
     id = request.form.get('id')  # Lấy giá trị ID từ dữ liệu POST
     if not id:
         flash("ID không hợp lệ!")
-        return redirect(url_for('view_khlcnt_test'))
+        return redirect(url_for('view_khlcnt'))
 
     try:
         cur = mysql.connection.cursor()
-        query = "DELETE FROM khlcnt_test WHERE id = %s"
+        query = "DELETE FROM khlcnt WHERE id = %s"
         cur.execute(query, (id,))
         mysql.connection.commit()
         cur.close()
@@ -221,13 +258,13 @@ def delete_record():
         flash("Xóa thành công!")
     except Exception as e:
         flash(f"Lỗi: {str(e)}")
-    return redirect(url_for('view_khlcnt_test'))
+    return redirect(url_for('view_khlcnt'))
 
 #=================== HÀM XÓA NHIỀU BẢN GHI =============================
 @app.route('/delete_multiple', methods=['POST'])
 def delete_multiple():
     """
-    Xóa nhiều record trong khlcnt_test dựa vào list id.
+    Xóa nhiều record trong khlcnt dựa vào list id.
     """
     if 'loggedin' not in session:
         return redirect(url_for('login'))
@@ -241,7 +278,7 @@ def delete_multiple():
         cur = mysql.connection.cursor()
         # Tạo chuỗi in cho WHERE id in (...)
         placeholders = ', '.join(['%s'] * len(ids))
-        query = f"DELETE FROM khlcnt_test WHERE id IN ({placeholders})"
+        query = f"DELETE FROM khlcnt WHERE id IN ({placeholders})"
         cur.execute(query, tuple(ids))
         mysql.connection.commit()
         cur.close()
@@ -279,7 +316,7 @@ def update_khlcnt(record_id):
     try:
         cur = mysql.connection.cursor()
         sql = """
-          UPDATE khlcnt_test 
+          UPDATE khlcnt 
           SET 
             mang=%s,
             du_an=%s,
@@ -301,14 +338,66 @@ def update_khlcnt(record_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+#====================== HÀM TÌM KIẾM =========================================
+@app.route('/search', methods=['GET'])
+def search():
+    if 'loggedin' not in session:
+        return redirect(url_for('login'))
+    
+    # Lấy keyword
+    q_mang = request.args.get('mang', '').strip()
+    q_du_an = request.args.get('du_an', '').strip()
+    q_ten_goi_thau = request.args.get('ten_goi_thau', '').strip()
+    q_nhan_su = request.args.get('nhan_su_to_chuyen_gia', '').strip()
+    
+    # Tạo SQL động
+    sql = """
+    SELECT 
+      id,mang,du_an,ten_goi_thau,thoi_gian_bat_dau_lcnt,muc_uu_tien,
+      step1_kh, step1_ngay_htthucte, step1_trang_thai,
+      ...
+      step19_kh, step19_ngay_htthucte, step19_trang_thai,
+      hang_ve_kho, nhan_su_to_chuyen_gia, email
+    FROM khlcnt
+    WHERE 1=1
+    """
+    params = []
+    
+    if q_mang:
+        sql += " AND mang LIKE %s"
+        params.append(f"%{q_mang}%")
+    if q_du_an:
+        sql += " AND du_an LIKE %s"
+        params.append(f"%{q_du_an}%")
+    if q_ten_goi_thau:
+        sql += " AND ten_goi_thau LIKE %s"
+        params.append(f"%{q_ten_goi_thau}%")
+    if q_nhan_su:
+        sql += " AND nhan_su_to_chuyen_gia LIKE %s"
+        params.append(f"%{q_nhan_su}%")
+    
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute(sql, tuple(params))
+        rows = cur.fetchall()
+        cur.close()
+        
+        # Render cùng template hiển thị danh sách
+        return render_template('chatgpt_backup.html', rows=rows,
+                               q_mang=q_mang, q_du_an=q_du_an, 
+                               q_ten_goi_thau=q_ten_goi_thau, 
+                               q_nhan_su=q_nhan_su)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # ==================  ROUTE IMPORT EXCEL  ==================
-@app.route('/import_khlcnt_test', methods=['POST'])
-def import_khlcnt_test():
+@app.route('/import_khlcnt', methods=['POST'])
+def import_khlcnt():
     """
     1) Nhận file Excel (có cột cha/cột con) -> đọc 2 hàng tiêu đề
     2) Map cột -> cột DB
     3) Tính step1_trang_thai ... step19_trang_thai
-    4) Insert vào bảng khlcnt_test
+    4) Insert vào bảng khlcnt
     5) Gửi mail cho các bản ghi có step nào đó = 'Chưa HT_TH' hoặc 'Chưa HT_QH'
     """
     if 'file' not in request.files:
@@ -465,7 +554,7 @@ def import_khlcnt_test():
 
             # Kiểm tra DB
             check_sql = """
-            SELECT id FROM khlcnt_test
+            SELECT id FROM khlcnt
             WHERE mang=%s
             AND du_an=%s
             AND ten_goi_thau=%s
@@ -480,7 +569,7 @@ def import_khlcnt_test():
                 print(f"Bỏ qua dòng vì trùng: {mang_val}, {du_an_val}, {ten_goi_thau_val}, {thoi_gian_bat_dau_lcnt_val}")
                 continue
             else:
-                insert_sql = f"INSERT INTO khlcnt_test ({columns_joined}) VALUES ({placeholders})"
+                insert_sql = f"INSERT INTO khlcnt ({columns_joined}) VALUES ({placeholders})"
                 values_tuple = tuple(row_data[col] for col in db_cols)
                 cur.execute(insert_sql, values_tuple)
 
@@ -519,7 +608,7 @@ def import_khlcnt_test():
               step19_trang_thai,
               du_an,
               ten_goi_thau
-            FROM khlcnt_test
+            FROM khlcnt
             WHERE id IN ({",".join(str(i) for i in inserted_ids)})
             """
             cur2.execute(select_sql)
