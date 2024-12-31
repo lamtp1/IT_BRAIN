@@ -11,7 +11,7 @@ import MySQLdb.cursors
 app = Flask(__name__)
 app.secret_key = 'cntt@123'  # cần cho session
 
-# emails_sent_count = 0  # ★ Biến đếm tổng số mail đã gửi
+emails_sent_count = 0  # ★ Biến đếm tổng số mail đã gửi
 
 # ==================  CẤU HÌNH MÀN LOGIN  ==================
 @app.route('/')
@@ -77,7 +77,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # ==================  HÀM GỬI MAIL  ==================
 def send_email(recipient, subject, content):
-    # global emails_sent_count
+    global emails_sent_count
     
     """
     Gửi mail với SMTP Gmail. Thay SMTP_EMAIL & SMTP_PASSWORD
@@ -101,7 +101,7 @@ def send_email(recipient, subject, content):
         server.sendmail(SMTP_EMAIL, recipient, msg.as_string())
         print(f"Email sent to {recipient}")
         
-        # emails_sent_count += 1
+        emails_sent_count += 1
     except Exception as e:
         print(f"Failed to send email to {recipient}: {e}")
     finally:
@@ -132,10 +132,11 @@ def get_status(ngay_htthucte, kh_date):
         else:
             return "Chưa HT_QH"
 
-# @app.route('/emails_sent_count', methods=['GET'])
-# def get_emails_sent_count():
-#     global emails_sent_count
-#     return jsonify({'count': emails_sent_count})
+#============ HÀM ĐẾM MAIL ĐÃ GỬI ==========================
+@app.route('/emails_sent_count', methods=['GET'])
+def get_emails_sent_count():
+    global emails_sent_count
+    return jsonify({'count': emails_sent_count})
 
 # @app.route('/')
 # def index():
@@ -221,6 +222,34 @@ def delete_record():
     except Exception as e:
         flash(f"Lỗi: {str(e)}")
     return redirect(url_for('view_khlcnt_test'))
+
+#=================== HÀM XÓA NHIỀU BẢN GHI =============================
+@app.route('/delete_multiple', methods=['POST'])
+def delete_multiple():
+    """
+    Xóa nhiều record trong khlcnt_test dựa vào list id.
+    """
+    if 'loggedin' not in session:
+        return redirect(url_for('login'))
+
+    data = request.get_json()
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify({'error': 'Không có id nào'}), 400
+
+    try:
+        cur = mysql.connection.cursor()
+        # Tạo chuỗi in cho WHERE id in (...)
+        placeholders = ', '.join(['%s'] * len(ids))
+        query = f"DELETE FROM khlcnt_test WHERE id IN ({placeholders})"
+        cur.execute(query, tuple(ids))
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify({'message': f'Đã xóa {len(ids)} dòng'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 #=================== HÀM UPDATE BẢN GHI =================================
 @app.route('/khlcnt/<int:record_id>', methods=['PUT'])

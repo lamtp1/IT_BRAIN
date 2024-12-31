@@ -154,7 +154,7 @@
             </div>
         </div>
 
-        <!-- Thanh công cụ -->
+        <!-- Thanh tìm kiếm và nút xóa nhiều -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <button class="btn btn-delete" onclick="openDeleteModalMultiple()">Xóa các đầu việc đã chọn</button>
             <div class="input-group" style="width: 400px;">
@@ -178,6 +178,7 @@
                 <thead>
                     <!-- Dòng tiêu đề chính -->
                     <tr>
+                        <th rowspan="2"><input type="checkbox" onclick="toggleAll(this)"></th>
                         <th rowspan="2">Mảng</th>
                         <th rowspan="2">Dự án</th>
                         <th rowspan="2">Tên gói thầu</th>
@@ -206,6 +207,7 @@
                         <th rowspan="2">Hàng về kho</th>
                         <th rowspan="2">Nhân sự tổ chuyên gia</th>
                         <th rowspan="2">Email</th>
+                        <th rowspan="2">Hành động</th>
                     </tr>
                     <!-- Dòng tiêu đề con -->
                     <tr>
@@ -266,11 +268,13 @@
                         <th>KH</th>
                         <th>Ngày HT TT</th>
                         <th>Trạng thái</th>
+                        <!-- <th>KH</th> -->
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in rows %}
                     <tr>
+                        <td><input type="checkbox" class="taskCheckbox" value="{{ row[0] }}"></td>
                         <td>{{ row[1] }}</td>
                         <td>{{ row[2] }}</td>
                         <td>{{ row[3] }}</td>
@@ -355,7 +359,7 @@
                               '{{ row[64] }}', /* nhan_su_to_chuyen_gia */
                               '{{ row[65] }}'  /* email */
                             )">
-                                Cập nhật
+                                Update
                             </button>
                         </td>
                     </tr>
@@ -413,15 +417,25 @@
         </div>
 
 
-        <!-- Modal xóa nhiều hoặc xóa 1 (tái sử dụng) -->
-        <div id="deleteModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeDeleteModal()">&times;</span>
-                <h2>Xác nhận xóa</h2>
-                <p id="deleteMessage">Bạn có chắc chắn muốn xóa các đầu việc đã chọn?</p>
-                <button onclick="confirmDeleteSelected()">Xác nhận</button>
-                <button onclick="closeDeleteModal()">Cancel</button>
+
+    <!-- Modal confirm xóa nhiều -->
+        <div id="deleteModal" class="modal"
+            style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.5);">
+            <div class="modal-content"
+                style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 30%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); text-align: center; position: relative;">
+                <span class="close" onclick="closeDeleteModal()"
+                    style="color: #aaa; position: absolute; top: 10px; right: 10px; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+                <h3>Bạn có chắc chắn muốn xóa các đầu việc đã chọn?</h3>
+                <button onclick="confirmDeleteSelected()"
+                    style="padding: 10px 20px; margin: 10px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; background-color: #ff4d4d; color: white; transition: background-color 0.3s;">Xác
+                    nhận</button>
+                <button onclick="closeDeleteModal()"
+                    style="padding: 10px 20px; margin: 10px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; background-color: #ccc; color: black; transition: background-color 0.3s;">Cancel</button>
             </div>
+        </div>
+
+        <div id="emailsSentBox">
+            <span>Số mail đã gửi: </span><span id="emailsSentCount">0</span>
         </div>
 
         <!-- Pagination controls -->
@@ -430,10 +444,6 @@
             <span id="paginationInfo"></span>
             <button id="nextPage" onclick="nextPage()">Next</button>
         </div> -->
-
-        <div id="emailsSentBox">
-            <span>Số mail đã gửi: </span><span id="emailsSentCount">0</span>
-        </div>
 
         <script>
             let currentPage = 1;
@@ -478,6 +488,65 @@
                         currentPage = data.current_page;
                     });
             }
+
+            // Hàm check/uncheck tất cả
+            function toggleAll(source) {
+                const checkboxes = document.querySelectorAll('.taskCheckbox');
+                for (let i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].checked = source.checked;
+                }
+            }
+
+            // Hàm mở modal xóa nhiều
+            function openDeleteModalMultiple() {
+                // Lấy list ID đã check
+                const checkboxes = document.querySelectorAll('.taskCheckbox:checked');
+                if (checkboxes.length === 0) {
+                    alert('Bạn chưa chọn dòng nào!');
+                    return;
+                }
+
+                // Hiển thị modal xác nhận
+                document.getElementById('deleteModal').style.display = 'block';
+            }
+
+            // Hàm xóa các bản ghi đã chọn
+            function confirmDeleteSelected() {
+                const checkboxes = document.querySelectorAll('.taskCheckbox:checked');
+                if (checkboxes.length === 0) {
+                    closeDeleteModal();
+                    return;
+                }
+
+                // Gom ID vào mảng
+                const ids = [];
+                checkboxes.forEach(cb => {
+                    ids.push(cb.value);
+                });
+
+                // Gửi request xóa nhiều
+                fetch('/delete_multiple', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: ids })
+                })
+                    .then(res => {
+                        if (res.ok) return res.json();
+                        else throw new Error('Không xóa được');
+                    })
+                    .then(data => {
+                        alert(data.message || 'Đã xóa thành công!');
+                        closeDeleteModal();
+                        location.reload(); // Hoặc reloadAjax()
+                    })
+                    .catch(err => alert(err));
+            }
+
+            // Hàm đóng delete modal
+            function closeDeleteModal() {
+                document.getElementById('deleteModal').style.display = 'none';
+            }
+
 
             // Hàm mở modal để update
             function openUpdateModal(id, mang, duAn, tenGoiThau, batDau, mucUuTien, hangVeKho, nhanSu, email) {
@@ -551,21 +620,22 @@
             }
 
             // Hàm đếm email
-            // function fetchEmailsSentCount() {
-            //     fetch('/emails_sent_count')
-            //         .then(response => response.json())
-            //         .then(data => {
-            //             // data.count = số mail đã gửi
-            //             document.getElementById('emailsSentCount').innerText = data.count;
-            //         })
-            //         .catch(err => console.error('Lỗi fetchEmailsSentCount:', err));
-            // }
+            function fetchEmailsSentCount() {
+                fetch('/emails_sent_count')
+                    .then(response => response.json())
+                    .then(data => {
+                        // data.count = số mail đã gửi
+                        document.getElementById('emailsSentCount').innerText = data.count;
+                    })
+                    .catch(err => console.error('Lỗi fetchEmailsSentCount:', err));
+            }
 
             // Cập nhật hiển thị 10s/lần (tùy bạn chọn chu kỳ)
-            // setInterval(fetchEmailsSentCount, 5000);
+            setInterval(fetchEmailsSentCount, 5000);
 
             // Gọi ngay 1 lần khi load trang
-            // fetchEmailsSentCount();
+            fetchEmailsSentCount();
+
             // Import file
             document.getElementById('importForm').onsubmit = function (event) {
                 event.preventDefault();
