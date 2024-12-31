@@ -11,7 +11,7 @@ import MySQLdb.cursors
 app = Flask(__name__)
 app.secret_key = 'cntt@123'  # cần cho session
 
-emails_sent_count = 0  # ★ Biến đếm tổng số mail đã gửi
+# emails_sent_count = 0  # ★ Biến đếm tổng số mail đã gửi
 
 # ==================  CẤU HÌNH MÀN LOGIN  ==================
 @app.route('/')
@@ -77,7 +77,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # ==================  HÀM GỬI MAIL  ==================
 def send_email(recipient, subject, content):
-    global emails_sent_count
+    # global emails_sent_count
     
     """
     Gửi mail với SMTP Gmail. Thay SMTP_EMAIL & SMTP_PASSWORD
@@ -101,7 +101,7 @@ def send_email(recipient, subject, content):
         server.sendmail(SMTP_EMAIL, recipient, msg.as_string())
         print(f"Email sent to {recipient}")
         
-        emails_sent_count += 1
+        # emails_sent_count += 1
     except Exception as e:
         print(f"Failed to send email to {recipient}: {e}")
     finally:
@@ -132,10 +132,10 @@ def get_status(ngay_htthucte, kh_date):
         else:
             return "Chưa HT_QH"
 
-@app.route('/emails_sent_count', methods=['GET'])
-def get_emails_sent_count():
-    global emails_sent_count
-    return jsonify({'count': emails_sent_count})
+# @app.route('/emails_sent_count', methods=['GET'])
+# def get_emails_sent_count():
+#     global emails_sent_count
+#     return jsonify({'count': emails_sent_count})
 
 # @app.route('/')
 # def index():
@@ -250,7 +250,7 @@ def update_khlcnt(record_id):
     try:
         cur = mysql.connection.cursor()
         sql = """
-          UPDATE khlcnt 
+          UPDATE khlcnt_test 
           SET 
             mang=%s,
             du_an=%s,
