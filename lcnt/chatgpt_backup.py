@@ -420,8 +420,8 @@ def import_khlcnt_test():
                     # Nếu cột DB là kiểu DATE, ta parse
                     if (db_col.endswith('_kh') or 
                         db_col.endswith('_ngay_htthucte') or 
-                        db_col == "hang_ve_kho" or 
-                        db_col == "thoi_gian_bat_dau_lcnt"):
+                        db_col == "hang_ve_kho"):
+                        # db_col == "thoi_gian_bat_dau_lcnt"):
                         if pd.isna(val):
                             row_data[db_col] = None
                         else:
@@ -456,11 +456,35 @@ def import_khlcnt_test():
             db_cols = list(row_data.keys())  # Tất cả cột ta có
             placeholders = ", ".join(["%s"] * len(db_cols))
             columns_joined = ", ".join(db_cols)
-            insert_sql = f"INSERT INTO khlcnt_test ({columns_joined}) VALUES ({placeholders})"
-            values_tuple = tuple(row_data[col] for col in db_cols)
-            cur.execute(insert_sql, values_tuple)
+                        # Check trùng bản ghi
+            # Hứng tạm 4 cột chính để check trùng:
+            mang_val = row_data.get('mang')
+            du_an_val = row_data.get('du_an')
+            ten_goi_thau_val = row_data.get('ten_goi_thau')
+            thoi_gian_bat_dau_lcnt_val = row_data.get('thoi_gian_bat_dau_lcnt')
 
-            inserted_ids.append(cur.lastrowid)
+            # Kiểm tra DB
+            check_sql = """
+            SELECT id FROM khlcnt_test
+            WHERE mang=%s
+            AND du_an=%s
+            AND ten_goi_thau=%s
+            AND thoi_gian_bat_dau_lcnt=%s
+            LIMIT 1
+            """
+            cur.execute(check_sql, (mang_val, du_an_val, ten_goi_thau_val, thoi_gian_bat_dau_lcnt_val))
+            duplicate = cur.fetchone()
+
+            if duplicate:
+                # Tồn tại rồi => bỏ qua, không insert
+                print(f"Bỏ qua dòng vì trùng: {mang_val}, {du_an_val}, {ten_goi_thau_val}, {thoi_gian_bat_dau_lcnt_val}")
+                continue
+            else:
+                insert_sql = f"INSERT INTO khlcnt_test ({columns_joined}) VALUES ({placeholders})"
+                values_tuple = tuple(row_data[col] for col in db_cols)
+                cur.execute(insert_sql, values_tuple)
+
+                inserted_ids.append(cur.lastrowid)
 
         mysql.connection.commit()
         cur.close()
