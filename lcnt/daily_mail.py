@@ -29,14 +29,14 @@ def send_email(recipient, subject, content):
 
 def send_daily_mails():
     # Kết nối DB (sửa host, user, pass, db)
-    conn = MySQLdb.connect(host="171.229.20.248", user="root", password="123", db="task_management", charset="utf8")
+    conn = MySQLdb.connect(host="171.229.20.248", user="root", password="Cdvdstyvds@1412", port=4406, db="task_management", charset="utf8")
     cur = conn.cursor(MySQLdb.cursors.DictCursor)
 
     # Lấy tất cả các bản ghi
     sql = """
     SELECT 
       id, du_an, ten_goi_thau, email, nhan_su_to_chuyen_gia,
-      step1_trang_thai, step2_trang_thai, ..., step19_trang_thai
+      step1_trang_thai, step2_trang_thai, step3_trang_thai, step4_trang_thai, step5_trang_thai, step6_trang_thai, step7_trang_thai, step8_trang_thai, step9_trang_thai, step10_trang_thai, step11_trang_thai, step12_trang_thai, step13_trang_thai, step14_trang_thai, step15_trang_thai, step16_trang_thai, step17_trang_thai, step18_trang_thai, step19_trang_thai
     FROM khlcnt_test
     """
     cur.execute(sql)
@@ -54,7 +54,7 @@ def send_daily_mails():
             subject = f"[Nhắc tiến độ] {r['ten_goi_thau']}"
             greet_name = r['nhan_su_to_chuyen_gia'] or "Bạn"
             content = f"""
-            <p>Chào {greet_name},</p>
+            <p>Chào đ/c {greet_name},</p>
             <p>Gói thầu <b>{r['ten_goi_thau']}</b> (thuộc Dự án: <b>{r['du_an']}</b>) vẫn còn ít nhất 1 bước <b>chưa hoàn thành</b>.</p>
             <p>Vui lòng kiểm tra tiến độ!</p>
             """
