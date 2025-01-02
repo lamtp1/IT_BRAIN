@@ -197,11 +197,34 @@ def view_khlcnt():
     """
     Lấy dữ liệu từ bảng 'khlcnt' và hiển thị lên giao diện.
     """
+        # Lấy tham số page, page_size (mặc định 1, 10)
+    page = request.args.get('page', default=1, type=int)
+    page_size = request.args.get('page_size', default=10, type=int)
+    
+    # Không để page_size quá lớn (phòng user nhập bừa), hoặc < 1
+    if page_size not in [5, 10, 20, 50]:
+        page_size = 10
+    
+    # Tính OFFSET
+    offset = (page - 1) * page_size
+
     # Lấy từ khoá search từ query params
     q = request.args.get('search', '').strip()
     try:
         # Kết nối và thực hiện truy vấn
         cur = mysql.connection.cursor()
+        count_sql = "SELECT COUNT(*) AS total FROM khlcnt_test"
+        cur.execute(count_sql)
+        total_rows = cur.fetchone()['total']  # total_rows = số lượng bản ghi
+        
+        # Tính tổng số trang (làm tròn lên)
+        import math
+        total_pages = math.ceil(total_rows / page_size)
+        
+        # Giới hạn page không vượt quá total_pages
+        if page > total_pages and total_pages > 0:
+            page = total_pages
+            offset = (page - 1) * page_size
         if q:
             query = """
             SELECT 
@@ -227,6 +250,7 @@ def view_khlcnt():
                 step19_kh, step19_ngay_htthucte, step19_trang_thai,
                 hang_ve_kho, nhan_su_to_chuyen_gia, email
             FROM khlcnt
+            LIMIT %s OFFSET %s            
             WHERE 
                 (mang LIKE %s
                  OR du_an LIKE %s
@@ -234,9 +258,22 @@ def view_khlcnt():
                  OR nhan_su_to_chuyen_gia LIKE %s)
             """
             like_pattern = f"%{q}%"
-            cur.execute(query, (like_pattern, like_pattern, like_pattern, like_pattern))
+            cur.execute(query, (like_pattern, like_pattern, like_pattern, like_pattern,page_size, offset))
         else:
             # Nếu không có search => lấy tất cả
+                # Đếm tất cả
+            count_sql = "SELECT COUNT(*) AS total FROM khlcnt_test"
+            cur.execute(count_sql)
+            total_rows = cur.fetchone()['total']  # total_rows = số lượng bản ghi
+            
+            # Tính tổng số trang (làm tròn lên)
+            import math
+            total_pages = math.ceil(total_rows / page_size)
+            
+            # Giới hạn page không vượt quá total_pages
+            if page > total_pages and total_pages > 0:
+                page = total_pages
+                offset = (page - 1) * page_size
             query = """
             SELECT 
                 id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
@@ -261,13 +298,20 @@ def view_khlcnt():
                 step19_kh, step19_ngay_htthucte, step19_trang_thai,
                 hang_ve_kho, nhan_su_to_chuyen_gia, email
             FROM khlcnt
+            LIMIT %s OFFSET %s
             """
-            cur.execute(query)
+            cur.execute(query, (page_size, offset))
         rows = cur.fetchall()
         cur.close()
 
         # Truyền dữ liệu tới template
-        return render_template('chatgpt_backup.html',  rows=rows)
+        return render_template(
+            'chatgpt_backup.html',  
+            rows=rows,
+            page=page,
+            page_size=page_size,
+            total_pages=total_pages,
+            total_rows=total_rows)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

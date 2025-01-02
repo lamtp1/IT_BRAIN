@@ -203,6 +203,7 @@
             <div class="records-per-page">
                 <label for="records-select">Số bản ghi/trang:</label>
                 <select id="records-select">
+                    <option value="10">5</option>
                     <option value="10">10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
@@ -402,6 +403,16 @@
                 </tbody>
             </table>
         </div>
+
+        <div>
+            <button id="prevPage" class="btn btn-secondary">Trang trước</button>
+            <span id="pageInfo"></span>
+            <button id="nextPage" class="btn btn-secondary">Trang sau</button>
+        </div>
+
+        <div class="pagination-info">
+            Trang {{ page }} / {{ total_pages }} (Tổng {{ total_rows }} bản ghi)
+          </div>
 
         <!-- Modal for updating record -->
         <div id="updateModal" class="modal">
@@ -696,6 +707,38 @@
                         }
                     });
             };
+
+            /* Hàm hiển thị số trang */
+            const pageParam = new URLSearchParams(window.location.search).get('page') || 1;
+            const pageSizeParam = new URLSearchParams(window.location.search).get('page_size') || 10;
+
+            // Gán giá trị cho dropdown khi load
+            document.getElementById('records-select').value = pageSizeParam;
+
+            // Khi chọn số bản ghi/trang, chuyển đến page=1
+            document.getElementById('records-select').addEventListener('change', function () {
+                const newPageSize = this.value;
+                window.location.href = `?page=1&page_size=${newPageSize}`;
+            });
+
+            // Nút Trang trước
+            document.getElementById('prevPage').addEventListener('click', function () {
+                let currentPage = parseInt(pageParam, 10);
+                let currentSize = parseInt(pageSizeParam, 10);
+                if (currentPage > 1) {
+                    window.location.href = `?page=${currentPage - 1}&page_size=${currentSize}`;
+                }
+            });
+
+            // Nút Trang sau
+            document.getElementById('nextPage').addEventListener('click', function () {
+                let currentPage = parseInt(pageParam, 10);
+                let currentSize = parseInt(pageSizeParam, 10);
+
+                // Ở client, ta không biết total_pages, trừ khi ta render ở server
+                // Để đơn giản, ta cứ +1, server check cận trên
+                window.location.href = `?page=${currentPage + 1}&page_size=${currentSize}`;
+            });
             // Load trang đầu tiên khi mở
             window.onload = fetchTasks;
         </script>
