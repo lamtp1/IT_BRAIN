@@ -213,9 +213,9 @@ def view_khlcnt():
     try:
         # Kết nối và thực hiện truy vấn
         cur = mysql.connection.cursor()
-        count_sql = "SELECT COUNT(*) AS total FROM khlcnt_test"
+        count_sql = "SELECT COUNT(*) AS total FROM khlcnt"
         cur.execute(count_sql)
-        total_rows = cur.fetchone()['total']  # total_rows = số lượng bản ghi
+        total_rows = cur.fetchone()[0]  # total_rows = số lượng bản ghi
         
         # Tính tổng số trang (làm tròn lên)
         import math
@@ -264,7 +264,7 @@ def view_khlcnt():
                 # Đếm tất cả
             count_sql = "SELECT COUNT(*) AS total FROM khlcnt_test"
             cur.execute(count_sql)
-            total_rows = cur.fetchone()['total']  # total_rows = số lượng bản ghi
+            total_rows = cur.fetchone()[0]  # total_rows = số lượng bản ghi
             
             # Tính tổng số trang (làm tròn lên)
             import math
