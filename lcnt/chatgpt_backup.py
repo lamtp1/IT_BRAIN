@@ -689,6 +689,6 @@ if __name__ == '__main__':
     scheduler = BackgroundScheduler()
     scheduler.start()
    # Thêm job vào scheduler
-    scheduler.add_job(daily_send_mail_job, 'cron', hour=14, minute=59, id='daily_mail_job', replace_existing=True)
+    scheduler.add_job(daily_send_mail_job, 'cron', hour=9, minute=15, id='daily_mail_job', replace_existing=True)
     # Nếu muốn truy cập từ ngoài container, hãy thêm host='0.0.0.0'
     app.run(host="0.0.0.0", port=5200,debug=True, use_reloader=False)
