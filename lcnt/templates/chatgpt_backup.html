@@ -194,7 +194,7 @@
             <div class="input-group" style="width: 400px;">
                 <!-- Thanh chọn Số bản ghi / Search -->
                 <form method="GET" action="/dashboard" class="mb-3 d-flex gap-2">
-                    <input type="text" name="search" value="{{ q }}" placeholder="Tìm kiếm..." />
+                    <input type="text" name="search" value="{{ q }}" class="form-control" placeholder="Tìm kiếm..." />
 
                     <select name="page_size">
                         <option value="5" {% if page_size==5 %}selected{% endif %}>5</option>
