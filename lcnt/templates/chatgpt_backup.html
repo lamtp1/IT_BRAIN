@@ -410,7 +410,7 @@
         </div>
 
         <!-- Phân trang -->
-        <div  style="text-align: center; margin-top: 10px;">
+        <div style="text-align: center; margin-top: 10px;">
             <a href="/dashboard?page={{ page - 1 if page > 1 else 1 }}&page_size={{ page_size }}&search={{ q|urlencode }}"
                 {% if page <=1 %}style="pointer-events: none; color: #ccc;" {% endif %}>Trang trước</a>
 
@@ -489,6 +489,50 @@
         </div>
 
         <script>
+            let currentPage = 1;
+            let currentPageSize = 10; // Mặc định 10
+            let updateTaskId = null;
+            let tasksToDelete = []; // Mảng lưu ID các task được chọn
+            let currentSearch = ''; // Biến toàn cục lưu giá trị search
+
+            // Fetch and display tasks with pagination
+            function fetchTasks(page = 1, pageSize = currentPageSize, search = currentSearch) {
+                // Encode search để tránh lỗi URL
+                const encodedSearch = encodeURIComponent(search);
+                fetch(`/tasks?page=${page}&page_size=${pageSize}&search=${encodedSearch}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const table = document.getElementById('taskTable');
+                        table.innerHTML = '';
+                        data.tasks.forEach(task => {
+                            table.innerHTML += `
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="taskCheckbox" value="${task[0]}">
+                                    </td>
+                                    <td>${task[0]}</td>
+                                    <td>${task[1]}</td>
+                                    <td>${task[2]}</td>
+                                    <td>${task[3]}</td>
+                                    <td>${task[4]}</td>
+                                    <td>${task[5]}</td>
+                                    <td>
+                                        <button class="update" onclick="openModal(${task[0]}, '${task[1]}', '${task[2]}', '${task[3]}', '${task[4]}', '${task[5]}')">Update</button>
+                                        <button class="delete" onclick="openDeleteModalSingle(${task[0]})">Delete</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+
+                        document.getElementById('paginationInfo').innerText = `Page ${data.current_page} of ${data.total_pages}`;
+                        document.getElementById('prevPage').disabled = data.current_page === 1;
+                        document.getElementById('nextPage').disabled = data.current_page === data.total_pages;
+
+                        currentPage = data.current_page;
+                    });
+            }
+
+
             // Hàm check/uncheck tất cả
             function toggleAll(source) {
                 const checkboxes = document.querySelectorAll('.taskCheckbox');
@@ -666,4 +710,5 @@
         </script>
 
 </body>
+
 </html>
