@@ -225,92 +225,11 @@
                         <th rowspan="2">Tên gói thầu</th>
                         <th rowspan="2">Thời gian bắt đầu LCNT</th>
                         <th rowspan="2">Mức ưu tiên</th>
-                        <th colspan="3" class="text-center">(1)_Xây dựng HSMT/HSYC</th>
-                        <th colspan="3" class="text-center">(2)_Hoàn thiện_HSMT/HSYC</th>
-                        <th colspan="3" class="text-center">(3)_Phê duyệt_HSMT/HSYC</th>
-                        <th colspan="3" class="text-center">(4)_Phát_thầu</th>
-                        <th colspan="3" class="text-center">(5)_Đóng, mở_thầu</th>
-                        <th colspan="3" class="text-center">(6)_Hoàn thành_chấm kỹ thuật, tài chính, pháp lý</th>
-                        <th colspan="3" class="text-center">(7)_Báo cáo quả_Đánh giá PL-KT-TC</th>
-                        <th colspan="3" class="text-center">(8)_Ký xong Báo cáo đánh </th>
-                        <th colspan="3" class="text-center">(9)_Thư mời thương thảo</th>
-                        <th colspan="3" class="text-center">(10)_Hoàn thiện ký biên bản thương thảo</th>
-                        <th colspan="3" class="text-center">(11)_Tờ trình phê duyệt Kết quả LCNT</th>
-                        <th colspan="3" class="text-center">(12)_Lấy nhận xét của Pháp chế</th>
-                        <th colspan="3" class="text-center">(13)_Trình Hội đồng đầu tư báo cáo thẩm định kết quả LCNT
-                        </th>
-                        <th colspan="3" class="text-center">(14)_Hội đồng ĐT phê duyệt Kết quả LCNT</th>
-                        <th colspan="3" class="text-center">(15)_TGĐ phê duyệt_KQLCNT</th>
-                        <th colspan="3" class="text-center">(16)_Thông báo KQLCNT và thư trao HĐ</th>
-                        <th colspan="3" class="text-center">(17)_Báo cáo kết quả đàm phán HĐ</th>
-                        <th colspan="3" class="text-center">(18)_Biên bản hoàn thiện hđ (nếu có)</th>
-                        <th colspan="3" class="text-center">(19)_Hoàn thành ký hợp đồng</th>
                         <th rowspan="2">Hàng về kho</th>
                         <th rowspan="2">Nhân sự tổ chuyên gia</th>
                         <th rowspan="2">Email</th>
+                    </tr>
 
-                    </tr>
-                    <!-- Dòng tiêu đề con -->
-                    <tr>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <th>KH</th>
-                        <th>Ngày HT TT</th>
-                        <th>Trạng thái</th>
-                        <!-- <th>KH</th> -->
-                    </tr>
                 </thead>
                 <tbody>
                     {% for row in rows %}
@@ -344,63 +263,6 @@
                         <td>{{ row[4] }}</td>
                         <td>{{ row[5] }}</td>
                         <td>{{ row[6] }}</td>
-                        <td>{{ row[7] }}</td>
-                        <td>{{ row[8] }}</td>
-                        <td>{{ row[9] }}</td>
-                        <td>{{ row[10] }}</td>
-                        <td>{{ row[11] }}</td>
-                        <td>{{ row[12] }}</td>
-                        <td>{{ row[13] }}</td>
-                        <td>{{ row[14] }}</td>
-                        <td>{{ row[15] }}</td>
-                        <td>{{ row[16] }}</td>
-                        <td>{{ row[17] }}</td>
-                        <td>{{ row[18] }}</td>
-                        <td>{{ row[19] }}</td>
-                        <td>{{ row[20] }}</td>
-                        <td>{{ row[21] }}</td>
-                        <td>{{ row[22] }}</td>
-                        <td>{{ row[23] }}</td>
-                        <td>{{ row[24] }}</td>
-                        <td>{{ row[25] }}</td>
-                        <td>{{ row[26] }}</td>
-                        <td>{{ row[27] }}</td>
-                        <td>{{ row[28] }}</td>
-                        <td>{{ row[29] }}</td>
-                        <td>{{ row[30] }}</td>
-                        <td>{{ row[31] }}</td>
-                        <td>{{ row[32] }}</td>
-                        <td>{{ row[33] }}</td>
-                        <td>{{ row[34] }}</td>
-                        <td>{{ row[35] }}</td>
-                        <td>{{ row[36] }}</td>
-                        <td>{{ row[37] }}</td>
-                        <td>{{ row[38] }}</td>
-                        <td>{{ row[39] }}</td>
-                        <td>{{ row[40] }}</td>
-                        <td>{{ row[41] }}</td>
-                        <td>{{ row[42] }}</td>
-                        <td>{{ row[43] }}</td>
-                        <td>{{ row[44] }}</td>
-                        <td>{{ row[45] }}</td>
-                        <td>{{ row[46] }}</td>
-                        <td>{{ row[47] }}</td>
-                        <td>{{ row[48] }}</td>
-                        <td>{{ row[49] }}</td>
-                        <td>{{ row[50] }}</td>
-                        <td>{{ row[51] }}</td>
-                        <td>{{ row[52] }}</td>
-                        <td>{{ row[53] }}</td>
-                        <td>{{ row[54] }}</td>
-                        <td>{{ row[55] }}</td>
-                        <td>{{ row[56] }}</td>
-                        <td>{{ row[57] }}</td>
-                        <td>{{ row[58] }}</td>
-                        <td>{{ row[59] }}</td>
-                        <td>{{ row[60] }}</td>
-                        <td>{{ row[61] }}</td>
-                        <td>{{ row[62] }}</td>
-                        <td>{{ row[63] }}</td>
                         <td>{{ row[64] }}</td>
                         <td>{{ row[65] }}</td>
                     </tr>
