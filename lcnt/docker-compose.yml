@@ -3,7 +3,7 @@ services:
   # Đặt tên service tùy ý
   lcnt_app_service:
     # Đặt container_name tùy ý
-    container_name: lcnt_real_2
+    container_name: lcnt_real
     build:
       context: .
       dockerfile: Dockerfile

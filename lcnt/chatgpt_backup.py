@@ -120,7 +120,7 @@ def daily_send_mail_job():
     SELECT 
       id, du_an, ten_goi_thau, email, nhan_su_to_chuyen_gia,
       step1_trang_thai, step2_trang_thai, step3_trang_thai, step4_trang_thai, step5_trang_thai, step6_trang_thai, step7_trang_thai, step8_trang_thai, step9_trang_thai, step10_trang_thai, step11_trang_thai, step12_trang_thai, step13_trang_thai, step14_trang_thai, step15_trang_thai, step16_trang_thai, step17_trang_thai, step18_trang_thai, step19_trang_thai
-    FROM khlcnt_test
+    FROM khlcnt
     """
     cur.execute(sql)
     rows = cur.fetchall()
@@ -188,6 +188,18 @@ def get_emails_sent_count():
 #     # Nếu đã login:
 #     # Lấy dữ liệu DB, render template
 #     return render_template('chatgpt_backup.html')
+
+# ================== HÀM HIỂN THỊ CHI TIẾT DỮ LIỆU ========================
+@app.route('/khlcnt_detail/<int:record_id>')
+def khlcnt_detail(record_id):
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("SELECT * FROM khlcnt WHERE id=%s", (record_id,))
+    row = cur.fetchone()
+    cur.close()
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(row)
+
 
 # ==================  Hàm hiển thị dữ liệu  ================================
 
@@ -719,6 +731,6 @@ if __name__ == '__main__':
     scheduler = BackgroundScheduler()
     scheduler.start()
    # Thêm job vào scheduler
-    scheduler.add_job(daily_send_mail_job, 'cron', hour=14, minute=59, id='daily_mail_job', replace_existing=True)
+    scheduler.add_job(daily_send_mail_job, 'cron', hour=9, minute=25, id='daily_mail_job', replace_existing=True)
     # Nếu muốn truy cập từ ngoài container, hãy thêm host='0.0.0.0'
     app.run(host="0.0.0.0", port=5200,debug=True, use_reloader=False)
