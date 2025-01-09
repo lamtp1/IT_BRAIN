@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách tiến độ LCNT</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        #importButton {
+            padding: 10px 15px;
+            /* Tăng khoảng cách bên trong nút */
+            font-size: 16px;
+            /* Tăng kích thước chữ */
+            font-weight: 500;
+            /* Làm chữ đậm hơn một chút */
+        }
+
+        #importButton {
+            margin-right: 5px;
+            /* Khoảng cách giữa icon và chữ */
+        }
+
+        #importButton {
+            margin-top: 10px;
+            /* Khoảng cách giữa các hàng */
+        }
+
+        /* Thêm class .modal thay vì inline style="display: none" */
+        #updateModal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50%;
+            max-height: 80vh;
+            overflow-y: auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+        }
+
+        #updateModal .modal-content {
+            border: none;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            /* để chứa nút close */
+        }
+
+        #updateModal .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            /* Khoảng cách giữa các thành phần */
+            align-items: center;
+            /* Căn giữa các thành phần theo chiều dọc */
+            padding: 10px;
+            /* Thêm padding cho container */
+            background-color: #f4f4f4;
+            /* Nền cho container */
+            margin-bottom: 20px;
+            /* Khoảng cách giữa container và bảng */
+        }
+
+        .header-container h1 {
+            margin: 0;
+            /* Loại bỏ margin mặc định của thẻ h1 */
+            color: #007bff;
+            /* Màu cho tiêu đề */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2 {
+            color: #343a40;
+            text-align: center;
+        }
+
+        .btn-custom {
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .btn-add {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background-color: #218838;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        .btn-logout {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background-color: #5a6268;
+        }
+
+        table {
+            width: 100%;
+            /* Đặt chiều rộng bảng là 100% của container chứa nó */
+            margin-top: 20px;
+            background: white;
+            border-collapse: collapse;
+            /* Xóa khoảng trắng giữa các border */
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ccc;
+            /* Thêm border cho bảng, th và td */
+        }
+
+        th,
+        td {
+            min-width: 150px;
+            /* Đặt chiều rộng tối thiểu cho mỗi ô là 150px */
+            padding: 8px;
+            /* Tăng khoảng cách trong các ô */
+            text-align: left;
+            /* Căn lề trái cho nội dung */
+        }
+
+        table thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .form-control {
+            font-size: 14px;
+        }
+
+        .pagination button {
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            margin: 0 2px;
+            cursor: pointer;
+        }
+
+        .modal-header {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <h2>Chào {{ session['username'] }}!</h2>
+        <h1 class="mb-4">QUẢN LÝ TIẾN ĐỘ DANH SÁCH GÓI THẦU</h1>
+        <div class="text-end mb-4">
+            <button class="btn btn-logout" onclick="location.href='/logout'">Đăng xuất</button>
+        </div>
+
+
+        <!-- Import Excel -->
+        <div id="importButton" class="card mb-4">
+            <div class="card-header bg-success text-white">Import danh sách tiến độ gói thầu từ Excel</div>
+            <div class="card-body">
+                <form id="importForm" enctype="multipart/form-data">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <input class="form-control" type="file" name="file" accept=".xlsx">
+                        </div>
+                        <div class="col-md-4 d-flex justify-content-between">
+                            <!-- Nút Import -->
+                            <button class="btn btn-primary flex-fill me-2" type="submit">
+                                Import
+                            </button>
+                            <!-- Nút tải file mẫu -->
+                            <a class="btn btn-success flex-fill"
+                                href="{{ url_for('static', filename='files/LCNT_file_import.xlsx') }}" download
+                                title="Tải xuống file Excel mẫu để nhập dữ liệu">
+                                <i class="bi bi-download"></i> Tải file excel mẫu
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Thanh tìm kiếm và nút xóa nhiều -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-delete" onclick="openDeleteModalMultiple()">Xóa các bản ghi đã chọn</button>
+            <div class="input-group" style="width: 400px;">
+                <!-- Thanh chọn Số bản ghi / Search -->
+                <form method="GET" action="/dashboard" class="mb-3 d-flex gap-2">
+                    <input type="text" name="search" value="{{ q }}" class="form-control" placeholder="Tìm kiếm..." />
+
+                    <select name="page_size">
+                        <option value="5" {% if page_size==5 %}selected{% endif %}>5</option>
+                        <option value="10" {% if page_size==10 %}selected{% endif %}>10</option>
+                        <option value="20" {% if page_size==20 %}selected{% endif %}>20</option>
+                        <option value="50" {% if page_size==50 %}selected{% endif %}>50</option>
+                    </select>
+                    <div class="input-group" style="width: 400px;">
+                        <input type="hidden" name="page" value="1" />
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- Bản danh sách công việc -->
+        <div class="table-responsive">
+            <h2 class="text-center">DANH SÁCH GÓI THẦU</h2>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <!-- Dòng tiêu đề chính -->
+                    <tr>
+                        <th rowspan="2"><input type="checkbox" onclick="toggleAll(this)"></th>
+                        <th rowspan="2">Hành động</th>
+                        <th rowspan="2">Mảng</th>
+                        <th rowspan="2">Dự án</th>
+                        <th rowspan="2">Tên gói thầu</th>
+                        <th rowspan="2">Thời gian bắt đầu LCNT</th>
+                        <th rowspan="2">Mức ưu tiên</th>
+                        <th rowspan="2">Hàng về kho</th>
+                        <th rowspan="2">Nhân sự tổ chuyên gia</th>
+                        <th rowspan="2">Email</th>
+                        <th rowspan="2">Xóa bản ghi</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td><input type="checkbox" class="taskCheckbox" value="{{ row[0] }}"></td>
+                        <td>
+                            <!-- Nút detail  -->
+                            <button class="btn btn-info" onclick="showDetail('{{ row[0] }}')">Chi tiết</button>
+                            <!-- Nút Update (thêm) -->
+                            <button class="btn btn-primary" onclick="openUpdateModal(
+                              '{{ row[0] }}',  /* id */
+                              '{{ row[1] }}',  /* mang */
+                              '{{ row[2] }}',  /* du_an */
+                              '{{ row[3] }}',  /* ten_goi_thau */
+                              '{{ row[4] }}',  /* thoi_gian_bat_dau_lcnt */
+                              '{{ row[5] }}',  /* muc_uu_tien */
+                              '{{ row[6] }}', /* hang_ve_kho */
+                              '{{ row[7] }}', /* nhan_su_to_chuyen_gia */
+                              '{{ row[8] }}'  /* email */
+                            )">
+                                Update
+                            </button>
+                        </td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td>
+                        <td>{{ row[5] }}</td>
+                        <td>{{ row[6] }}</td>
+                        <td>{{ row[7] }}</td>
+                        <td>{{ row[8] }}</td>
+                        <td>
+                            <form action="{{ url_for('delete_record') }}" method="POST">
+                                <!-- Truyền id vào input ẩn -->
+                                <input type="hidden" name="id" value="{{ row[0] }}">
+                                <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Bạn có chắc muốn xóa không?');">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Phân trang -->
+        <div style="text-align: center; margin-top: 10px;">
+            <a href="/dashboard?page={{ page - 1 if page > 1 else 1 }}&page_size={{ page_size }}&search={{ q|urlencode }}"
+                {% if page <=1 %}style="pointer-events: none; color: #ccc;" {% endif %}>Trang trước</a>
+
+            <span>Trang {{ page }} / {{ total_pages }} (Tổng {{ total_rows }} bản ghi)</span>
+
+            <a href="/dashboard?page={{ page + 1 if page < total_pages else total_pages }}&page_size={{ page_size }}&search={{ q|urlencode }}"
+                {% if page>= total_pages %}style="pointer-events: none; color: #ccc;"{% endif %}>Trang sau</a>
+        </div>
+
+        <!-- Modal for updating record -->
+        <div id="updateModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeUpdateModal()">&times;</span>
+                <h2>Cập nhật gói thầu</h2>
+
+                <form id="updateForm">
+                    <input type="hidden" id="updateId">
+
+                    <div class="mb-3">
+                        <label>Mảng</label>
+                        <input type="text" id="updateMang" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Dự án</label>
+                        <input type="text" id="updateDuAn" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Tên gói thầu</label>
+                        <input type="text" id="updateTenGoiThau" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Thời gian bắt đầu LCNT</label>
+                        <input type="text" id="updateBatDau" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Mức ưu tiên</label>
+                        <input type="text" id="updateMucUuTien" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Hàng về kho</label>
+                        <input type="date" id="updateHangVeKho" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Nhân sự Tổ chuyên gia</label>
+                        <input type="text" id="updateNhanSu" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <input type="email" id="updateEmail" class="form-control">
+                    </div>
+                </form>
+
+                <button class="btn btn-success" onclick="confirmUpdate()">Lưu</button>
+                <button class="btn btn-secondary" onclick="closeUpdateModal()">Hủy</button>
+            </div>
+        </div>
+
+        <!-- Modal chi tiết -->
+        <div id="detailModal" class="modal"
+            style="display:none; position: fixed; z-index:9999; top:50%; left:50%; 
+            transform:translate(-50%,-50%); width:70%; max-height:80vh; overflow-y:auto; 
+            background:#fff; border:1px solid #ccc; border-radius:4px; box-shadow:0 2px 10px rgba(0,0,0,0.2); padding:20px;">
+
+            <!-- Nút đóng -->
+            <div style="text-align:right; margin-bottom:10px;">
+                <button onclick="closeDetailModal()" style="
+                        background: transparent; 
+                        border: none; 
+                        font-size: 25px; 
+                        cursor: pointer; 
+                        color: #333;">
+                    &times;
+                </button>
+            </div>
+
+            <h2 class="text-center">Chi tiết tiến độ gói thầu</h2>
+
+            <div id="detailContent"></div>
+        </div>
+
+        <!-- Modal confirm xóa nhiều -->
+        <div id="deleteModal" class="modal"
+            style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.5);">
+            <div class="modal-content"
+                style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 30%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); text-align: center; position: relative;">
+                <span class="close" onclick="closeDeleteModal()"
+                    style="color: #aaa; position: absolute; top: 10px; right: 10px; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+                <h3>Bạn có chắc chắn muốn xóa các đầu việc đã chọn?</h3>
+                <button onclick="confirmDeleteSelected()"
+                    style="padding: 10px 20px; margin: 10px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; background-color: #ff4d4d; color: white; transition: background-color 0.3s;">Xác
+                    nhận</button>
+                <button onclick="closeDeleteModal()"
+                    style="padding: 10px 20px; margin: 10px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; background-color: #ccc; color: black; transition: background-color 0.3s;">Cancel</button>
+            </div>
+        </div>
+
+        <div id="emailsSentBox">
+            <span>Số mail đã gửi: </span><span id="emailsSentCount">0</span>
+        </div>
+
+        <script>
+            let currentPage = 1;
+            let currentPageSize = 10; // Mặc định 10
+            let updateTaskId = null;
+            let tasksToDelete = []; // Mảng lưu ID các task được chọn
+            let currentSearch = ''; // Biến toàn cục lưu giá trị search
+
+            // Fetch and display tasks with pagination
+            function fetchTasks(page = 1, pageSize = currentPageSize, search = currentSearch) {
+                // Encode search để tránh lỗi URL
+                const encodedSearch = encodeURIComponent(search);
+                fetch(`/tasks?page=${page}&page_size=${pageSize}&search=${encodedSearch}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const table = document.getElementById('taskTable');
+                        table.innerHTML = '';
+                        data.tasks.forEach(task => {
+                            table.innerHTML += `
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="taskCheckbox" value="${task[0]}">
+                                    </td>
+                                    <td>${task[0]}</td>
+                                    <td>${task[1]}</td>
+                                    <td>${task[2]}</td>
+                                    <td>${task[3]}</td>
+                                    <td>${task[4]}</td>
+                                    <td>${task[5]}</td>
+                                    <td>
+                                        <button class="update" onclick="openModal(${task[0]}, '${task[1]}', '${task[2]}', '${task[3]}', '${task[4]}', '${task[5]}')">Update</button>
+                                        <button class="delete" onclick="openDeleteModalSingle(${task[0]})">Delete</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+
+                        document.getElementById('paginationInfo').innerText = `Page ${data.current_page} of ${data.total_pages}`;
+                        document.getElementById('prevPage').disabled = data.current_page === 1;
+                        document.getElementById('nextPage').disabled = data.current_page === data.total_pages;
+
+                        currentPage = data.current_page;
+                    });
+            }
+
+            // Mảng 19 tên bước
+            const stepTitles = [
+                "(1)_Xây dựng HSMT/HSYC",
+                "(2)_Hoàn thiện_HSMT/HSYC",
+                "(3)_Phê duyệt_HSMT/HSYC",
+                "(4)_Phát_thầu",
+                "(5)_Đóng, mở_thầu",
+                "(6)_Hoàn thành_chấm kỹ thuật, tài chính, pháp lý",
+                "(7)_Báo cáo quả_Đánh giá PL-KT-TC",
+                "(8)_Ký xong Báo cáo đánh",
+                "(9)_Thư mời thương thảo",
+                "(10)_Hoàn thiện ký biên bản thương thảo",
+                "(11)_Tờ trình phê duyệt Kết quả LCNT",
+                "(12)_Lấy nhận xét của Pháp chế",
+                "(13)_Trình Hội đồng đầu tư báo cáo thẩm định kết quả LCNT",
+                "(14)_Hội đồng ĐT phê duyệt Kết quả LCNT",
+                "(15)_TGĐ phê duyệt_KQLCNT",
+                "(16)_Thông báo KQLCNT và thư trao HĐ",
+                "(17)_Báo cáo kết quả đàm phán HĐ",
+                "(18)_Biên bản hoàn thiện hđ (nếu có)",
+                "(19)_Hoàn thành ký hợp đồng"
+            ];
+
+            // Hàm chuyển ngày tháng thành dd-mm-yyyy
+            function formatDateStr(dateStr) {
+                if (!dateStr) return ""; // nếu giá trị null/undefined -> trả về rỗng
+
+                // Parse dateStr thành đối tượng Date
+                const d = new Date(dateStr);
+
+                // Lấy ngày, tháng, năm, nhớ cộng +1 cho tháng vì getMonth() trả 0..11
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+
+                // Trả về chuỗi dd-mm-yyyy
+                return `${day}-${month}-${year}`;
+            }
+
+            // Hàm hiển thị chi tiết 
+            function showDetail(id) {
+                fetch(`/khlcnt_detail/${id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert("Không tìm thấy record!");
+                            return;
+                        }
+                        // Tạo HTML (dùng Bootstrap cards hoặc bảng, v.v.)
+                        let html = "";
+                        for (let i = 1; i <= 19; i++) {
+                            const stepName = stepTitles[i - 1];  // lấy tên từ mảng
+                            const kh_col = data[`step${i}_kh`];
+                            const khFormatted = formatDateStr(kh_col);
+                            const ngay_col = data[`step${i}_ngay_htthucte`];
+                            const ngayFormatted = formatDateStr(ngay_col);
+                            const trangthai_col = data[`step${i}_trang_thai`];
+
+                            // Ví dụ dùng card kiểu Bootstrap
+                            html += `
+                                    <div class="card mb-3 shadow-sm">
+                                        <div class="card-header text-white bg-primary">
+                                            ${stepName}
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Ngày hoàn thành theo KH:</strong> ${khFormatted || ""}</p>
+                                            <p><strong>Ngày hoàn thành thực tế:</strong> ${ngayFormatted || ""}</p>
+                                            <p><strong>Trạng thái:</strong> <span class="text-danger">${trangthai_col || ""}</span></p>
+                                        </div>
+                                    </div>
+                                    `;
+                        }
+
+                        document.getElementById('detailContent').innerHTML = html;
+                        document.getElementById('detailModal').style.display = 'block';
+                    })
+                    .catch(err => console.error(err));
+            }
+
+            // Hàm check/uncheck tất cả
+            function toggleAll(source) {
+                const checkboxes = document.querySelectorAll('.taskCheckbox');
+                for (let i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].checked = source.checked;
+                }
+            }
+
+            // Hàm mở modal xóa nhiều
+            function openDeleteModalMultiple() {
+                // Lấy list ID đã check
+                const checkboxes = document.querySelectorAll('.taskCheckbox:checked');
+                if (checkboxes.length === 0) {
+                    alert('Bạn chưa chọn dòng nào!');
+                    return;
+                }
+
+                // Hiển thị modal xác nhận
+                document.getElementById('deleteModal').style.display = 'block';
+            }
+
+            // Hàm xóa các bản ghi đã chọn
+            function confirmDeleteSelected() {
+                const checkboxes = document.querySelectorAll('.taskCheckbox:checked');
+                if (checkboxes.length === 0) {
+                    closeDeleteModal();
+                    return;
+                }
+
+                // Gom ID vào mảng
+                const ids = [];
+                checkboxes.forEach(cb => {
+                    ids.push(cb.value);
+                });
+
+                // Gửi request xóa nhiều
+                fetch('/delete_multiple', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: ids })
+                })
+                    .then(res => {
+                        if (res.ok) return res.json();
+                        else throw new Error('Không xóa được');
+                    })
+                    .then(data => {
+                        alert(data.message || 'Đã xóa thành công!');
+                        closeDeleteModal();
+                        location.reload(); // Hoặc reloadAjax()
+                    })
+                    .catch(err => alert(err));
+            }
+
+            // Hàm đóng delete modal
+            function closeDeleteModal() {
+                document.getElementById('deleteModal').style.display = 'none';
+            }
+
+
+            // Hàm mở modal để update
+            function openUpdateModal(id, mang, duAn, tenGoiThau, batDau, mucUuTien, hangVeKho, nhanSu, email) {
+                // Lưu id vào input ẩn
+                document.getElementById('updateId').value = id;
+                document.getElementById('updateMang').value = mang;
+                document.getElementById('updateDuAn').value = duAn;
+                document.getElementById('updateTenGoiThau').value = tenGoiThau;
+
+                // Date field - convert sang yyyy-mm-dd nếu chuỗi date cũ
+                document.getElementById('updateBatDau').value = batDau;
+                document.getElementById('updateMucUuTien').value = mucUuTien;
+                document.getElementById('updateHangVeKho').value = hangVeKho;
+                document.getElementById('updateNhanSu').value = nhanSu;
+                document.getElementById('updateEmail').value = email;
+
+                document.getElementById('updateModal').style.display = 'block';
+            }
+
+            // Hàm confirm update:
+            function confirmUpdate() {
+                const id = document.getElementById('updateId').value;
+                const mang = document.getElementById('updateMang').value;
+                const duAn = document.getElementById('updateDuAn').value;
+                const tenGoiThau = document.getElementById('updateTenGoiThau').value;
+                const batDau = document.getElementById('updateBatDau').value;
+                const mucUuTien = document.getElementById('updateMucUuTien').value;
+                const hangVeKho = document.getElementById('updateHangVeKho').value;
+                const nhanSu = document.getElementById('updateNhanSu').value;
+                const email = document.getElementById('updateEmail').value;
+
+                const payload = {
+                    mang: mang,
+                    du_an: duAn,
+                    ten_goi_thau: tenGoiThau,
+                    thoi_gian_bat_dau_lcnt: batDau,
+                    muc_uu_tien: mucUuTien,
+                    hang_ve_kho: hangVeKho,
+                    nhan_su_to_chuyen_gia: nhanSu,
+                    email: email
+                };
+
+                fetch(`/khlcnt/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                    .then(res => {
+                        if (res.ok) {
+                            return res.json();
+                        } else {
+                            throw new Error('Lỗi update');
+                        }
+                    })
+                    .then(data => {
+                        alert(data.message || 'Cập nhật thành công');
+                        closeUpdateModal();
+                        // Tải lại trang hoặc AJAX reload data
+                        location.reload();  // hoặc bạn có thể fetchAjax() để cập nhật mà không reload
+                    })
+                    .catch(err => {
+                        alert(err);
+                    });
+            }
+
+            function closeDetailModal() {
+                document.getElementById('detailModal').style.display = 'none';
+            }
+            // Hàm đóng modal update
+            function closeUpdateModal() {
+                document.getElementById('updateModal').style.display = 'none';
+            }
+
+            // Hàm đếm email
+            function fetchEmailsSentCount() {
+                fetch('/emails_sent_count')
+                    .then(response => response.json())
+                    .then(data => {
+                        // data.count = số mail đã gửi
+                        document.getElementById('emailsSentCount').innerText = data.count;
+                    })
+                    .catch(err => console.error('Lỗi fetchEmailsSentCount:', err));
+            }
+
+            // Hàm tìm kiếm
+            function searchTasks() {
+                const keyword = document.getElementById('searchInput').value;
+                // Chuyển hướng (redirect) đến /dashboard kèm query ?search=...
+                window.location.href = '/dashboard?search=' + encodeURIComponent(keyword);
+            }
+
+            // Cập nhật hiển thị 10s/lần (tùy bạn chọn chu kỳ)
+            setInterval(fetchEmailsSentCount, 5000);
+
+            // Gọi ngay 1 lần khi load trang
+            fetchEmailsSentCount();
+
+            // Hàm đóng modal detail bằng nút escape
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape" || e.keyCode === 27) {
+                    // Gọi hàm đóng modal và update modal
+                    closeDetailModal();
+                    closeUpdateModal()
+                }
+            });
+
+            // Import file
+            document.getElementById('importForm').onsubmit = function (event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                fetch('/import_khlcnt', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            fetchTasks();
+                            alert('Import thành công!');
+                            location.reload()
+                        } else {
+                            response.json().then(data => alert(data.error || 'Import thất bại!'));
+                        }
+                    });
+            };
+            // Load trang đầu tiên khi mở
+            window.onload = fetchTasks;
+        </script>
+
+</body>
+
+</html>
