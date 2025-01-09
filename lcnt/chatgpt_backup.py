@@ -120,7 +120,7 @@ def daily_send_mail_job():
     SELECT 
       id, du_an, ten_goi_thau, email, nhan_su_to_chuyen_gia,
       step1_trang_thai, step2_trang_thai, step3_trang_thai, step4_trang_thai, step5_trang_thai, step6_trang_thai, step7_trang_thai, step8_trang_thai, step9_trang_thai, step10_trang_thai, step11_trang_thai, step12_trang_thai, step13_trang_thai, step14_trang_thai, step15_trang_thai, step16_trang_thai, step17_trang_thai, step18_trang_thai, step19_trang_thai
-    FROM khlcnt_test
+    FROM khlcnt
     """
     cur.execute(sql)
     rows = cur.fetchall()
@@ -189,6 +189,18 @@ def get_emails_sent_count():
 #     # Lấy dữ liệu DB, render template
 #     return render_template('chatgpt_backup.html')
 
+# ================== HÀM HIỂN THỊ CHI TIẾT DỮ LIỆU ========================
+@app.route('/khlcnt_detail/<int:record_id>')
+def khlcnt_detail(record_id):
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("SELECT * FROM khlcnt WHERE id=%s", (record_id,))
+    row = cur.fetchone()
+    cur.close()
+    if not row:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(row)
+
+
 # ==================  Hàm hiển thị dữ liệu  ================================
 
 @app.route('/dashboard', methods=['GET'])
@@ -243,25 +255,7 @@ def view_khlcnt():
             query = """
                 SELECT 
                         id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
-                        step1_kh, step1_ngay_htthucte, step1_trang_thai,
-                        step2_kh, step2_ngay_htthucte, step2_trang_thai,
-                        step3_kh, step3_ngay_htthucte, step3_trang_thai,
-                        step4_kh, step4_ngay_htthucte, step4_trang_thai,
-                        step5_kh, step5_ngay_htthucte, step5_trang_thai,
-                        step6_kh, step6_ngay_htthucte, step6_trang_thai,
-                        step7_kh, step7_ngay_htthucte, step7_trang_thai,
-                        step8_kh, step8_ngay_htthucte, step8_trang_thai,
-                        step9_kh, step9_ngay_htthucte, step9_trang_thai,
-                        step10_kh, step10_ngay_htthucte, step10_trang_thai,
-                        step11_kh, step11_ngay_htthucte, step11_trang_thai,
-                        step12_kh, step12_ngay_htthucte, step12_trang_thai,
-                        step13_kh, step13_ngay_htthucte, step13_trang_thai,
-                        step14_kh, step14_ngay_htthucte, step14_trang_thai,
-                        step15_kh, step15_ngay_htthucte, step15_trang_thai,
-                        step16_kh, step16_ngay_htthucte, step16_trang_thai,
-                        step17_kh, step17_ngay_htthucte, step17_trang_thai,
-                        step18_kh, step18_ngay_htthucte, step18_trang_thai,
-                        step19_kh, step19_ngay_htthucte, step19_trang_thai,
+           
                         hang_ve_kho, nhan_su_to_chuyen_gia, email
                     FROM khlcnt
                     WHERE 
@@ -297,25 +291,7 @@ def view_khlcnt():
             query = """
                 SELECT 
                         id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
-                        step1_kh, step1_ngay_htthucte, step1_trang_thai,
-                        step2_kh, step2_ngay_htthucte, step2_trang_thai,
-                        step3_kh, step3_ngay_htthucte, step3_trang_thai,
-                        step4_kh, step4_ngay_htthucte, step4_trang_thai,
-                        step5_kh, step5_ngay_htthucte, step5_trang_thai,
-                        step6_kh, step6_ngay_htthucte, step6_trang_thai,
-                        step7_kh, step7_ngay_htthucte, step7_trang_thai,
-                        step8_kh, step8_ngay_htthucte, step8_trang_thai,
-                        step9_kh, step9_ngay_htthucte, step9_trang_thai,
-                        step10_kh, step10_ngay_htthucte, step10_trang_thai,
-                        step11_kh, step11_ngay_htthucte, step11_trang_thai,
-                        step12_kh, step12_ngay_htthucte, step12_trang_thai,
-                        step13_kh, step13_ngay_htthucte, step13_trang_thai,
-                        step14_kh, step14_ngay_htthucte, step14_trang_thai,
-                        step15_kh, step15_ngay_htthucte, step15_trang_thai,
-                        step16_kh, step16_ngay_htthucte, step16_trang_thai,
-                        step17_kh, step17_ngay_htthucte, step17_trang_thai,
-                        step18_kh, step18_ngay_htthucte, step18_trang_thai,
-                        step19_kh, step19_ngay_htthucte, step19_trang_thai,
+              
                         hang_ve_kho, nhan_su_to_chuyen_gia, email
                     FROM khlcnt
                     LIMIT %s OFFSET %s                 
@@ -755,6 +731,6 @@ if __name__ == '__main__':
     scheduler = BackgroundScheduler()
     scheduler.start()
    # Thêm job vào scheduler
-    scheduler.add_job(daily_send_mail_job, 'cron', hour=14, minute=59, id='daily_mail_job', replace_existing=True)
+    scheduler.add_job(daily_send_mail_job, 'cron', hour=9, minute=25, id='daily_mail_job', replace_existing=True)
     # Nếu muốn truy cập từ ngoài container, hãy thêm host='0.0.0.0'
     app.run(host="0.0.0.0", port=5200,debug=True, use_reloader=False)
