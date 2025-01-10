@@ -278,7 +278,8 @@
                               '{{ row[5] }}',  /* muc_uu_tien */
                               '{{ row[6] }}', /* hang_ve_kho */
                               '{{ row[7] }}', /* nhan_su_to_chuyen_gia */
-                              '{{ row[8] }}'  /* email */
+                              '{{ row[8] }}',  /* email */
+                              '{{ row[9] }}'  /* step1_ngay_htthucte */
                             )">
                                 Update
                             </button>
@@ -357,8 +358,13 @@
                         <label>Email</label>
                         <input type="email" id="updateEmail" class="form-control">
                     </div>
+                    <!-- Thêm 19 input date cho các step -->
+                    <div class="mb-3">
+                        <label>Step 1 - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step1_ngay" class="form-control" />
+                    </div>
+                    <!-- ... Tương tự step3..19 ... -->
                 </form>
-
                 <button class="btn btn-success" onclick="confirmUpdate()">Lưu</button>
                 <button class="btn btn-secondary" onclick="closeUpdateModal()">Hủy</button>
             </div>
@@ -590,7 +596,7 @@
 
 
             // Hàm mở modal để update
-            function openUpdateModal(id, mang, duAn, tenGoiThau, batDau, mucUuTien, hangVeKho, nhanSu, email) {
+            function openUpdateModal(id, mang, duAn, tenGoiThau, batDau, mucUuTien, hangVeKho, nhanSu, email, step1_ngay) {
                 // Lưu id vào input ẩn
                 document.getElementById('updateId').value = id;
                 document.getElementById('updateMang').value = mang;
@@ -603,6 +609,7 @@
                 document.getElementById('updateHangVeKho').value = hangVeKho;
                 document.getElementById('updateNhanSu').value = nhanSu;
                 document.getElementById('updateEmail').value = email;
+                document.getElementById('step1_ngay').value = step1_ngay;
 
                 document.getElementById('updateModal').style.display = 'block';
             }
@@ -618,6 +625,7 @@
                 const hangVeKho = document.getElementById('updateHangVeKho').value;
                 const nhanSu = document.getElementById('updateNhanSu').value;
                 const email = document.getElementById('updateEmail').value;
+                const step1_ngay = document.getElementById('step1_ngay').value; 
 
                 const payload = {
                     mang: mang,
@@ -627,7 +635,8 @@
                     muc_uu_tien: mucUuTien,
                     hang_ve_kho: hangVeKho,
                     nhan_su_to_chuyen_gia: nhanSu,
-                    email: email
+                    email: email,
+                    step1_ngay_htthucte: step1_ngay
                 };
 
                 fetch(`/khlcnt/${id}`, {
@@ -682,7 +691,7 @@
             }
 
             // Cập nhật hiển thị 10s/lần (tùy bạn chọn chu kỳ)
-            setInterval(fetchEmailsSentCount, 5000);
+            setInterval(fetchEmailsSentCount, 500000);
 
             // Gọi ngay 1 lần khi load trang
             fetchEmailsSentCount();

@@ -256,7 +256,7 @@ def view_khlcnt():
                 SELECT 
                         id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
            
-                        hang_ve_kho, nhan_su_to_chuyen_gia, email
+                        hang_ve_kho, nhan_su_to_chuyen_gia, email, step1_ngay_htthucte
                     FROM khlcnt
                     WHERE 
                         (mang LIKE %s
@@ -292,7 +292,7 @@ def view_khlcnt():
                 SELECT 
                         id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
               
-                        hang_ve_kho, nhan_su_to_chuyen_gia, email
+                        hang_ve_kho, nhan_su_to_chuyen_gia, email, step1_ngay_htthucte
                     FROM khlcnt
                     LIMIT %s OFFSET %s                 
                     """
@@ -383,14 +383,37 @@ def update_khlcnt(record_id):
       - email
     """
     data = request.json
+
+    # print("DEBUG step1_ngay_htthucte =", data.get('step1_ngay_htthucte'))
+        # Parse date
+    import datetime
+    def parse_date(strdate):
+        if not strdate: 
+            return None
+        return datetime.datetime.strptime(strdate, '%Y-%m-%d').date()
+
+    # print(step1_ngay)
+        # Lấy cột KH cũ (step1_kh, step2_kh, ...) từ DB để so sánh
+        
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("SELECT * FROM khlcnt WHERE id=%s", (record_id,))
+    row = cur.fetchone()
+    if not row:
+        return jsonify({"error": "Record not found"}), 404
+    
+    # Tính lại stepX_trang_thai
+    # (giả sử row['step1_kh'] là cột date KH)
     mang = data.get('mang')
     du_an = data.get('du_an')
     ten_goi_thau = data.get('ten_goi_thau')
     thoi_gian_bat_dau_lcnt = data.get('thoi_gian_bat_dau_lcnt')
     muc_uu_tien = data.get('muc_uu_tien')
-    hang_ve_kho = data.get('hang_ve_kho')
+    hang_ve_kho = parse_date(data.get('hang_ve_kho'))
     nhan_su_to_chuyen_gia = data.get('nhan_su_to_chuyen_gia')
     email = data.get('email')
+    step1_ngay = parse_date(data.get('step1_ngay_htthucte'))
+    step1_kh = row['step1_kh']  # type date or None
+    s1_status = get_status(step1_ngay, step1_kh)  # => "HT_TH", ...
 
     # Update DB
     try:
@@ -405,12 +428,14 @@ def update_khlcnt(record_id):
             muc_uu_tien=%s,
             hang_ve_kho=%s,
             nhan_su_to_chuyen_gia=%s,
-            email=%s
+            email=%s,
+            step1_ngay_htthucte=%s, 
+            step1_trang_thai=%s
           WHERE id=%s
         """
         cur.execute(sql, (mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, 
                           muc_uu_tien, hang_ve_kho, nhan_su_to_chuyen_gia, 
-                          email, record_id))
+                          email, step1_ngay, s1_status, record_id))
         mysql.connection.commit()
         cur.close()
 
