@@ -278,7 +278,26 @@
                               '{{ row[5] }}',  /* muc_uu_tien */
                               '{{ row[6] }}', /* hang_ve_kho */
                               '{{ row[7] }}', /* nhan_su_to_chuyen_gia */
-                              '{{ row[8] }}'  /* email */
+                              '{{ row[8] }}',  /* email */
+                              '{{ row[9] }}',  /* step1_ngay_htthucte */
+                              '{{ row[10] }}', /* step2_ngay_htthucte */
+                              '{{ row[11] }}', /* step3_ngay_htthucte */
+                              '{{ row[12] }}', /* step4_ngay_htthucte */
+                              '{{ row[13] }}', /* step5_ngay_htthucte */
+                              '{{ row[14] }}', /* step6_ngay_htthucte */
+                              '{{ row[15] }}', /* step7_ngay_htthucte */
+                              '{{ row[16] }}', /* step8_ngay_htthucte */
+                              '{{ row[17] }}', /* step9_ngay_htthucte */
+                              '{{ row[18] }}', /* step10_ngay_htthucte */
+                              '{{ row[19] }}', /* step11_ngay_htthucte */
+                              '{{ row[20] }}', /* step12_ngay_htthucte */
+                              '{{ row[21] }}', /* step13_ngay_htthucte */
+                              '{{ row[22] }}', /* step14_ngay_htthucte */
+                              '{{ row[23] }}', /* step15_ngay_htthucte */
+                              '{{ row[24] }}', /* step16_ngay_htthucte */
+                              '{{ row[25] }}', /* step17_ngay_htthucte */
+                              '{{ row[26] }}', /* step18_ngay_htthucte */
+                              '{{ row[27] }}', /* step19_ngay_htthucte */
                             )">
                                 Update
                             </button>
@@ -357,8 +376,84 @@
                         <label>Email</label>
                         <input type="email" id="updateEmail" class="form-control">
                     </div>
+                    <!-- Thêm 19 input date cho các step -->
+                    <div class="mb-3">
+                        <label>(1)_Xây dựng HSMT/HSYC - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step1_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(2)_Hoàn thiện_HSMT/HSYC - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step2_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(3)_Phê duyệt_HSMT/HSYC - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step3_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(4)_Phát_thầu - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step4_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(5)_Đóng, mở_thầu - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step5_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(6)_Hoàn thành_chấm kỹ thuật, tài chính, pháp lý - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step6_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(7)_Báo cáo quả_Đánh giá PL-KT-TC - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step7_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(8)_Ký xong Báo cáo đánh  - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step8_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(9)_Thư mời thương thảo - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step9_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(10)_Hoàn thiện ký biên bản thương thảo - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step10_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(11)_Tờ trình phê duyệt Kết quả LCNT - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step11_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(12)_Lấy nhận xét của Pháp chế - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step12_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(13)_Trình Hội đồng đầu tư báo cáo thẩm định kết quả LCNT - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step13_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(14)_Hội đồng ĐT phê duyệt  Kết quả LCNT - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step14_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(15)_TGĐ phê duyệt_KQLCNT - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step15_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(16)_Thông báo KQLCNT và thư trao HĐ - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step16_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(17)_Báo cáo kết quả đàm phán HĐ - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step17_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(18)_Biên bản hoàn thiện hđ - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step18_ngay" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>(19)_Hoàn thành ký hợp đồng - Ngày hoàn thành thực tế:</label>
+                        <input type="date" id="step19_ngay" class="form-control" />
+                    </div>
                 </form>
-
                 <button class="btn btn-success" onclick="confirmUpdate()">Lưu</button>
                 <button class="btn btn-secondary" onclick="closeUpdateModal()">Hủy</button>
             </div>
@@ -590,7 +685,7 @@
 
 
             // Hàm mở modal để update
-            function openUpdateModal(id, mang, duAn, tenGoiThau, batDau, mucUuTien, hangVeKho, nhanSu, email) {
+            function openUpdateModal(id, mang, duAn, tenGoiThau, batDau, mucUuTien, hangVeKho, nhanSu, email, step1_ngay, step2_ngay, step3_ngay, step4_ngay, step5_ngay, step6_ngay, step7_ngay, step8_ngay, step9_ngay, step10_ngay, step11_ngay, step12_ngay, step13_ngay, step14_ngay, step15_ngay, step16_ngay, step17_ngay, step18_ngay, step19_ngay) {
                 // Lưu id vào input ẩn
                 document.getElementById('updateId').value = id;
                 document.getElementById('updateMang').value = mang;
@@ -603,6 +698,25 @@
                 document.getElementById('updateHangVeKho').value = hangVeKho;
                 document.getElementById('updateNhanSu').value = nhanSu;
                 document.getElementById('updateEmail').value = email;
+                document.getElementById('step1_ngay').value = step1_ngay;
+                document.getElementById('step2_ngay').value = step2_ngay;
+                document.getElementById('step3_ngay').value = step3_ngay;
+                document.getElementById('step4_ngay').value = step4_ngay;
+                document.getElementById('step5_ngay').value = step5_ngay;
+                document.getElementById('step6_ngay').value = step6_ngay;
+                document.getElementById('step7_ngay').value = step7_ngay;
+                document.getElementById('step8_ngay').value = step8_ngay;
+                document.getElementById('step9_ngay').value = step9_ngay;
+                document.getElementById('step10_ngay').value = step10_ngay;
+                document.getElementById('step11_ngay').value = step11_ngay;
+                document.getElementById('step12_ngay').value = step12_ngay;
+                document.getElementById('step13_ngay').value = step13_ngay;
+                document.getElementById('step14_ngay').value = step14_ngay;
+                document.getElementById('step15_ngay').value = step15_ngay;
+                document.getElementById('step16_ngay').value = step16_ngay;
+                document.getElementById('step17_ngay').value = step17_ngay;
+                document.getElementById('step18_ngay').value = step18_ngay;
+                document.getElementById('step19_ngay').value = step19_ngay;                
 
                 document.getElementById('updateModal').style.display = 'block';
             }
@@ -618,6 +732,25 @@
                 const hangVeKho = document.getElementById('updateHangVeKho').value;
                 const nhanSu = document.getElementById('updateNhanSu').value;
                 const email = document.getElementById('updateEmail').value;
+                const step1_ngay = document.getElementById('step1_ngay').value; 
+                const step2_ngay = document.getElementById('step2_ngay').value; 
+                const step3_ngay = document.getElementById('step3_ngay').value; 
+                const step4_ngay = document.getElementById('step4_ngay').value; 
+                const step5_ngay = document.getElementById('step5_ngay').value; 
+                const step6_ngay = document.getElementById('step6_ngay').value; 
+                const step7_ngay = document.getElementById('step7_ngay').value; 
+                const step8_ngay = document.getElementById('step8_ngay').value; 
+                const step9_ngay = document.getElementById('step9_ngay').value; 
+                const step10_ngay = document.getElementById('step10_ngay').value; 
+                const step11_ngay = document.getElementById('step11_ngay').value; 
+                const step12_ngay = document.getElementById('step12_ngay').value; 
+                const step13_ngay = document.getElementById('step13_ngay').value; 
+                const step14_ngay = document.getElementById('step14_ngay').value; 
+                const step15_ngay = document.getElementById('step15_ngay').value; 
+                const step16_ngay = document.getElementById('step16_ngay').value; 
+                const step17_ngay = document.getElementById('step17_ngay').value; 
+                const step18_ngay = document.getElementById('step18_ngay').value; 
+                const step19_ngay = document.getElementById('step19_ngay').value; 
 
                 const payload = {
                     mang: mang,
@@ -627,7 +760,27 @@
                     muc_uu_tien: mucUuTien,
                     hang_ve_kho: hangVeKho,
                     nhan_su_to_chuyen_gia: nhanSu,
-                    email: email
+                    email: email,
+                    step1_ngay_htthucte: step1_ngay,
+                    step2_ngay_htthucte: step2_ngay,
+                    step3_ngay_htthucte: step3_ngay,
+                    step4_ngay_htthucte: step4_ngay,
+                    step5_ngay_htthucte: step5_ngay,
+                    step6_ngay_htthucte: step6_ngay,
+                    step7_ngay_htthucte: step7_ngay,
+                    step8_ngay_htthucte: step8_ngay,
+                    step9_ngay_htthucte: step9_ngay,
+                    step10_ngay_htthucte: step10_ngay,
+                    step11_ngay_htthucte: step11_ngay,
+                    step12_ngay_htthucte: step12_ngay,
+                    step13_ngay_htthucte: step13_ngay,
+                    step14_ngay_htthucte: step14_ngay,
+                    step15_ngay_htthucte: step15_ngay,
+                    step16_ngay_htthucte: step16_ngay,
+                    step17_ngay_htthucte: step17_ngay,
+                    step18_ngay_htthucte: step18_ngay,
+                    step19_ngay_htthucte: step19_ngay
+
                 };
 
                 fetch(`/khlcnt/${id}`, {
@@ -682,7 +835,7 @@
             }
 
             // Cập nhật hiển thị 10s/lần (tùy bạn chọn chu kỳ)
-            setInterval(fetchEmailsSentCount, 5000);
+            setInterval(fetchEmailsSentCount, 500000);
 
             // Gọi ngay 1 lần khi load trang
             fetchEmailsSentCount();
