@@ -256,7 +256,12 @@ def view_khlcnt():
                 SELECT 
                         id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
            
-                        hang_ve_kho, nhan_su_to_chuyen_gia, email, step1_ngay_htthucte
+                        hang_ve_kho, nhan_su_to_chuyen_gia, email, step1_ngay_htthucte, step2_ngay_htthucte,
+                        step3_ngay_htthucte, step4_ngay_htthucte, step5_ngay_htthucte, step6_ngay_htthucte,
+                        step7_ngay_htthucte, step8_ngay_htthucte, step9_ngay_htthucte, step10_ngay_htthucte,
+                        step11_ngay_htthucte, step12_ngay_htthucte, step13_ngay_htthucte, step14_ngay_htthucte, 
+                        step15_ngay_htthucte, step16_ngay_htthucte, step17_ngay_htthucte, step18_ngay_htthucte,
+                        step19_ngay_htthucte
                     FROM khlcnt
                     WHERE 
                         (mang LIKE %s
@@ -292,7 +297,12 @@ def view_khlcnt():
                 SELECT 
                         id,mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, muc_uu_tien,
               
-                        hang_ve_kho, nhan_su_to_chuyen_gia, email, step1_ngay_htthucte
+                        hang_ve_kho, nhan_su_to_chuyen_gia, email, step1_ngay_htthucte, step2_ngay_htthucte,
+                        step3_ngay_htthucte, step4_ngay_htthucte, step5_ngay_htthucte, step6_ngay_htthucte,
+                        step7_ngay_htthucte, step8_ngay_htthucte, step9_ngay_htthucte, step10_ngay_htthucte,
+                        step11_ngay_htthucte, step12_ngay_htthucte, step13_ngay_htthucte, step14_ngay_htthucte, 
+                        step15_ngay_htthucte, step16_ngay_htthucte, step17_ngay_htthucte, step18_ngay_htthucte,
+                        step19_ngay_htthucte
                     FROM khlcnt
                     LIMIT %s OFFSET %s                 
                     """
@@ -411,10 +421,82 @@ def update_khlcnt(record_id):
     hang_ve_kho = parse_date(data.get('hang_ve_kho'))
     nhan_su_to_chuyen_gia = data.get('nhan_su_to_chuyen_gia')
     email = data.get('email')
+
     step1_ngay = parse_date(data.get('step1_ngay_htthucte'))
     step1_kh = row['step1_kh']  # type date or None
     s1_status = get_status(step1_ngay, step1_kh)  # => "HT_TH", ...
 
+    step2_ngay = parse_date(data.get('step2_ngay_htthucte'))
+    step2_kh = row['step2_kh']  # type date or None
+    s2_status = get_status(step2_ngay, step2_kh)  # => "HT_TH", ...
+
+    step3_ngay = parse_date(data.get('step3_ngay_htthucte'))
+    step3_kh = row['step3_kh']  # type date or None
+    s3_status = get_status(step3_ngay, step3_kh)  # => "HT_TH", ...
+
+    step4_ngay = parse_date(data.get('step4_ngay_htthucte'))
+    step4_kh = row['step4_kh']  # type date or None
+    s4_status = get_status(step4_ngay, step4_kh)  # => "HT_TH", ...
+
+    step5_ngay = parse_date(data.get('step5_ngay_htthucte'))
+    step5_kh = row['step5_kh']  # type date or None
+    s5_status = get_status(step5_ngay, step5_kh)  # => "HT_TH", ...
+
+    step6_ngay = parse_date(data.get('step6_ngay_htthucte'))
+    step6_kh = row['step6_kh']  # type date or None
+    s6_status = get_status(step6_ngay, step6_kh)  # => "HT_TH", ...
+
+    step7_ngay = parse_date(data.get('step7_ngay_htthucte'))
+    step7_kh = row['step7_kh']  # type date or None
+    s7_status = get_status(step7_ngay, step7_kh)  # => "HT_TH", ...
+
+    step8_ngay = parse_date(data.get('step8_ngay_htthucte'))
+    step8_kh = row['step8_kh']  # type date or None
+    s8_status = get_status(step8_ngay, step8_kh)  # => "HT_TH", ...
+
+    step9_ngay = parse_date(data.get('step9_ngay_htthucte'))
+    step9_kh = row['step9_kh']  # type date or None
+    s9_status = get_status(step9_ngay, step9_kh)  # => "HT_TH", ...
+
+    step10_ngay = parse_date(data.get('step10_ngay_htthucte'))
+    step10_kh = row['step10_kh']  # type date or None
+    s10_status = get_status(step10_ngay, step10_kh)  # => "HT_TH", ...
+
+    step11_ngay = parse_date(data.get('step11_ngay_htthucte'))
+    step11_kh = row['step11_kh']  # type date or None
+    s11_status = get_status(step11_ngay, step11_kh)  # => "HT_TH", ...
+
+    step12_ngay = parse_date(data.get('step12_ngay_htthucte'))
+    step12_kh = row['step12_kh']  # type date or None
+    s12_status = get_status(step12_ngay, step12_kh)  # => "HT_TH", ...
+
+    step13_ngay = parse_date(data.get('step13_ngay_htthucte'))
+    step13_kh = row['step13_kh']  # type date or None
+    s13_status = get_status(step13_ngay, step13_kh)  # => "HT_TH", ...
+
+    step14_ngay = parse_date(data.get('step14_ngay_htthucte'))
+    step14_kh = row['step14_kh']  # type date or None
+    s14_status = get_status(step14_ngay, step14_kh)  # => "HT_TH", ...
+
+    step15_ngay = parse_date(data.get('step15_ngay_htthucte'))
+    step15_kh = row['step15_kh']  # type date or None
+    s15_status = get_status(step15_ngay, step15_kh)  # => "HT_TH", ...
+
+    step16_ngay = parse_date(data.get('step16_ngay_htthucte'))
+    step16_kh = row['step16_kh']  # type date or None
+    s16_status = get_status(step16_ngay, step16_kh)  # => "HT_TH", ...
+
+    step17_ngay = parse_date(data.get('step17_ngay_htthucte'))
+    step17_kh = row['step17_kh']  # type date or None
+    s17_status = get_status(step17_ngay, step17_kh)  # => "HT_TH", ...
+
+    step18_ngay = parse_date(data.get('step18_ngay_htthucte'))
+    step18_kh = row['step18_kh']  # type date or None
+    s18_status = get_status(step18_ngay, step18_kh)  # => "HT_TH", ...
+
+    step19_ngay = parse_date(data.get('step19_ngay_htthucte'))
+    step19_kh = row['step19_kh']  # type date or None
+    s19_status = get_status(step19_ngay, step19_kh)  # => "HT_TH", ...
     # Update DB
     try:
         cur = mysql.connection.cursor()
@@ -429,13 +511,48 @@ def update_khlcnt(record_id):
             hang_ve_kho=%s,
             nhan_su_to_chuyen_gia=%s,
             email=%s,
-            step1_ngay_htthucte=%s, 
-            step1_trang_thai=%s
+            step1_ngay_htthucte=%s, step1_trang_thai=%s,
+            step2_ngay_htthucte=%s, step2_trang_thai=%s,
+            step3_ngay_htthucte=%s, step3_trang_thai=%s,
+            step4_ngay_htthucte=%s, step4_trang_thai=%s,
+            step5_ngay_htthucte=%s, step5_trang_thai=%s,
+            step6_ngay_htthucte=%s, step6_trang_thai=%s,
+            step7_ngay_htthucte=%s, step7_trang_thai=%s,
+            step8_ngay_htthucte=%s, step8_trang_thai=%s,
+            step9_ngay_htthucte=%s, step9_trang_thai=%s,
+            step10_ngay_htthucte=%s, step10_trang_thai=%s,
+            step11_ngay_htthucte=%s, step11_trang_thai=%s,
+            step12_ngay_htthucte=%s, step12_trang_thai=%s,
+            step13_ngay_htthucte=%s, step13_trang_thai=%s,
+            step14_ngay_htthucte=%s, step14_trang_thai=%s,
+            step15_ngay_htthucte=%s, step15_trang_thai=%s,
+            step16_ngay_htthucte=%s, step16_trang_thai=%s,
+            step17_ngay_htthucte=%s, step17_trang_thai=%s,
+            step18_ngay_htthucte=%s, step18_trang_thai=%s,
+            step19_ngay_htthucte=%s, step19_trang_thai=%s
           WHERE id=%s
         """
         cur.execute(sql, (mang, du_an, ten_goi_thau, thoi_gian_bat_dau_lcnt, 
                           muc_uu_tien, hang_ve_kho, nhan_su_to_chuyen_gia, 
-                          email, step1_ngay, s1_status, record_id))
+                          email, step1_ngay, s1_status, 
+                                step2_ngay, s2_status,
+                                step3_ngay, s3_status,
+                                step4_ngay, s4_status,
+                                step5_ngay, s5_status,
+                                step6_ngay, s6_status,
+                                step7_ngay, s7_status,
+                                step8_ngay, s8_status,
+                                step9_ngay, s9_status,
+                                step10_ngay, s10_status,
+                                step11_ngay, s11_status,
+                                step12_ngay, s12_status,
+                                step13_ngay, s13_status,
+                                step14_ngay, s14_status,
+                                step15_ngay, s15_status,
+                                step16_ngay, s16_status,
+                                step17_ngay, s17_status,
+                                step18_ngay, s18_status,
+                                step19_ngay, s19_status, record_id))
         mysql.connection.commit()
         cur.close()
 
@@ -552,14 +669,14 @@ def import_khlcnt():
             ("(7)_Báo cáo quả_Đánh giá PL-KT-TC","KH"): "step7_kh",
             ("(7)_Báo cáo quả_Đánh giá PL-KT-TC","Ngày hoàn thành thực tế"): "step7_ngay_htthucte",
             
-            ("(8)_Ký xong Báo cáo đánh","KH"): "step8_kh",
-            ("(8)_Ký xong Báo cáo đánh","Ngày hoàn thành thực tế"): "step8_ngay_htthucte",
+            ("(8)_Ký xong Báo cáo đánh giá của TCG","KH"): "step8_kh",
+            ("(8)_Ký xong Báo cáo đánh giá của TCG","Ngày hoàn thành thực tế"): "step8_ngay_htthucte",
 
             ("(9)_Thư mời thương thảo","KH"): "step9_kh",
             ("(9)_Thư mời thương thảo","Ngày hoàn thành thực tế"): "step9_ngay_htthucte",
 
-            ("(10)_Hoàn thiện ký biên bản thương thảo","KH"): "step10_kh",
-            ("(10)_Hoàn thiện ký biên bản thương thảo","Ngày hoàn thành thực tế"): "step10_ngay_htthucte",
+            ("(10)_Hoàn thiện ký biên bản thương thảo hợp đồng","KH"): "step10_kh",
+            ("(10)_Hoàn thiện ký biên bản thương thảo hợp đồng","Ngày hoàn thành thực tế"): "step10_ngay_htthucte",
 
             ("(11)_Tờ trình phê duyệt Kết quả LCNT","KH"): "step11_kh",
             ("(11)_Tờ trình phê duyệt Kết quả LCNT","Ngày hoàn thành thực tế"): "step11_ngay_htthucte",
