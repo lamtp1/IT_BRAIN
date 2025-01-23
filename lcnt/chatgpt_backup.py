@@ -64,10 +64,10 @@ def logout():
     return redirect(url_for('login'))
 
 # ==================  CẤU HÌNH MYSQL  ==================
-app.config['MYSQL_HOST'] = '171.229.20.248'
+app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Cdvdstyvds@1412'
-app.config['MYSQL_PORT'] = 4406
+app.config['MYSQL_PASSWORD'] = '123456'
+app.config['MYSQL_PORT'] = 3306
 app.config['MYSQL_DB'] = 'task_management'  # Tên DB chứa bảng khlcnt, status_lcnt
 mysql = MySQL(app)
 
