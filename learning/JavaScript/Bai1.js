@@ -1,24 +1,11 @@
- class XeMay {
-    LopXe
-    DongCo
-    NhienLieu
-
-    constructor(LopXe, DongCo, NhienLieu) {
-        this.DongCo = DongCo
-        this.LopXe = LopXe
-        this.NhienLieu = NhienLieu
-    }
-
-    getLopXe() {
-        return `Lốp xe của hãng này là ${this.LopXe}`
-    }
-
-    setLopXe(LopXe1) {
-        this.LopXe = LopXe1
-    }
+let a = {
+    ten: "Lam",
+    tuoi: 26,
+    chieu_cao: 167,
+    nghe: 'NVVP'
 }
-let a = new XeMay("Michelin", "Động cơ V8", "Động cơ xăng")
-a.LopXe = "Dunlop"
-console.log(a)
-console.log(a.getLopXe())
 
+let b = ['ten', 'tuoi', 'chieu_cao', 'nghe']
+
+console.log('kieu du lieu cua a la ', typeof a, 'gia tri cua bien a la ', a)
+console.log('kieu du lieu cua b la ', typeof b, 'gia tri cua bien b la ', b)
